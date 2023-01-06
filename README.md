@@ -1,4 +1,4 @@
-#Java CSV-Reader an CSV-Writer 
+# Java CSV-Reader an CSV-Writer  
 CsvReader can read .csv files in any characterset encoding (also with BOM) and with configurable separator and optional stringquote (delimiter).
 CsvWriter can write .csv files and supports the same features as CsvReader.
 There are also some other convenient optional configuration values.
