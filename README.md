@@ -23,9 +23,9 @@ Format features:
 - Character to escape the string quote character within quoted strings can be configured
 	By default this is the stringquote character itself, so it is doubled in quoted strings, but may also be configured to a backslash '\'
 - Allow linebreaks in data texts without the effect of a new data set line or use "\\n" to escape linebreaks on csv output
-- Allow escaped stringquotes to use them as a character in data text. May be turned off for data consistency checks. */
+- Allow escaped stringquotes to use them as a character in data text. May be turned off for data consistency checks
 - Allow lines with less than the expected number of data entries per line can be configured
-- Allow lines with more than the expected number of data entries per line, if those are empty. */
+- Allow lines with more than the expected number of data entries per line, if those are empty
 - Trim all data values
 - Quote data entries: NO_QUOTE, QUOTE_IF_NEEDED, QUOTE_STRINGS, QUOTE_ALL_DATA
 - Linebreak character for output can be configured
