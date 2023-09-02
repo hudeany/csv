@@ -14,7 +14,7 @@ CsvWriter can write .csv files and streams and supports the same features as Csv
 - Configurable allows too short csvdata lines (trailing empty columns)
 - Read line by line or all data at once
 
-Format features:
+## Format features:
 
 - Separating character can be configured
 - Character for string quotes can be configured
@@ -29,7 +29,7 @@ Format features:
 - Ignore empty lines can be configured
 - Use headers in first csv line can be configured
 
-CsvReader example:
+## CsvReader example:
 
 		final String csvData =
 			"abc;def;123\n"
@@ -48,7 +48,7 @@ CsvReader example:
 			System.out.println(nextDataLine);
 		}
 
-CsvWriter example:
+## CsvWriter example:
 
 		try (CsvWriter writer = new CsvWriter(new FileOutputStream("MyFile.csv"), new CsvFormat().setSeparator(';').setStringQuote('\"'))) {
 			writer.writeValues(new Object[] {
