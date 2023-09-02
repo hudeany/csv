@@ -31,28 +31,21 @@ Format features:
 
 CsvReader example:
 
-		CsvReader reader = null;
-		try {
-			String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\r\n;\"\"56\"";
+		final String csvData =
+			"abc;def;123\n"
+			+ "ghi;jkl;456";
 
-			CsvFormat csvFormat = new CsvFormat().setSeparator(';');
-			
-			reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes("UTF-8")), csvFormat);
-			
-			List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("def", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
-			Assert.assertEquals("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"´`^°²³*#.,:=+-~_|", dataLines.get(1).get(0));
-			Assert.assertEquals("jkl", dataLines.get(1).get(1));
-			Assert.assertEquals("4\n\n;\"56", dataLines.get(1).get(2));
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
+		final CsvFormat csvFormat = new CsvFormat().setSeparator(';');
+
+		List<List<String>> dataLines;
+		try (CsvReader readerForAllAtOnce = new CsvReader(new ByteArrayInputStream(csvData.getBytes("UTF-8")), csvFormat)) {
+			dataLines = readerForAllAtOnce.readAll();
+		}
+		System.out.println(dataLines);
+
+		try (CsvReader readerForLineByLine = new CsvReader(new ByteArrayInputStream(csvData.getBytes("UTF-8")), csvFormat)) {
+			final List<String> nextDataLine = readerForLineByLine.readNextCsvLine();
+			System.out.println(nextDataLine);
 		}
 
 CsvWriter example:
