@@ -10,7 +10,7 @@ public class CsvFormat {
 	/** Default output linebreak. */
 	public static final String DEFAULT_LINEBREAK = "\n";
 
-	/** Mandatory separating charactor */
+	/** Mandatory separating character */
 	private char separator = DEFAULT_SEPARATOR;
 
 	/** Character for stringquotes */
@@ -27,7 +27,7 @@ public class CsvFormat {
 	private boolean lineBreakInDataAllowed = true;
 
 	/** Allow escaped stringquotes to use them as a character in data text.
-	 * Maybe turned off for data consistency checks. */
+	 * May be turned off for data consistency checks. */
 	private boolean escapedStringQuoteInDataAllowed = true;
 
 	/** Allow lines with less than the expected number of data entries per line. */
