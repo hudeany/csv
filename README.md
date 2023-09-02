@@ -4,7 +4,7 @@ CsvReader can read .csv files and streams in any characterset encoding (also wit
 
 CsvWriter can write .csv files and streams and supports the same features as CsvReader.
 
-General features:
+## General features:
 
 - Using data streams instead of files only
 - Handles linebreaks within quoted data
