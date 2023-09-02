@@ -12,7 +12,7 @@ General features:
 - Configurable separator character
 - Configurable optional string quote character
 - Configurable allows too short csvdata lines (trailing empty columns)
-- Read line per line or all data at once
+- Read line by line or all data at once
 
 Format features:
 
