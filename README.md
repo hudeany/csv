@@ -31,7 +31,7 @@ Format features:
 
 Example:
 
-  CsvReader reader = null;
+		CsvReader reader = null;
 		try {
 			String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\r\n;\"\"56\"";
 
