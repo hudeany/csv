@@ -35,8 +35,7 @@ CsvReader example:
 		try {
 			String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\r\n;\"\"56\"";
 
-			CsvFormat csvFormat = new CsvFormat()
-				.setSeparator(';');
+			CsvFormat csvFormat = new CsvFormat().setSeparator(';');
 			
 			reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes("UTF-8")), csvFormat);
 			
