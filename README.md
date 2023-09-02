@@ -50,7 +50,8 @@ CsvWriter can write .csv files and streams and supports the same features as Csv
 
 ## CsvWriter example:
 
-		try (CsvWriter writer = new CsvWriter(new FileOutputStream("MyFile.csv"), new CsvFormat().setSeparator(';').setStringQuote('\"'))) {
+		final CsvFormat csvFormat = new CsvFormat().setSeparator(';').setStringQuote('\"');
+		try (CsvWriter writer = new CsvWriter(new FileOutputStream("MyFile.csv"), csvFormat)) {
 			writer.writeValues(new Object[] {
 				"abc",
 				"def",
