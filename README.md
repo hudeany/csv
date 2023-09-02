@@ -55,3 +55,30 @@ Example:
 				reader.close();
 			}
 		}
+
+		CsvWriter writer = null;
+		try {
+			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().setSeparator(';').setStringQuote('\"'));
+			writer.writeValues(new Object[] {
+				"abc",
+				"def",
+				"123"
+			});
+			writer.writeValues(new Object[] {
+				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"´`^°²³*#.,:=+-~_|",
+				"jkl",
+				"4\n\n;\"56"
+			});
+			String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\n;\"\"56\"\n";
+			writer.close();
+			writer = null;
+			Assert.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), "UTF-8"));
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail(e.getMessage());
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
+		}
