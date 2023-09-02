@@ -29,7 +29,7 @@ Format features:
 - Ignore empty lines can be configured
 - Use headers in first csv line can be configured
 
-Example:
+CsvReader example:
 
 		CsvReader reader = null;
 		try {
@@ -55,6 +55,8 @@ Example:
 				reader.close();
 			}
 		}
+
+CsvWriter example:
 
 		CsvWriter writer = null;
 		try {
