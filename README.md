@@ -50,30 +50,16 @@ CsvReader example:
 
 CsvWriter example:
 
-		CsvWriter writer = null;
-		try {
-			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().setSeparator(';').setStringQuote('\"'));
+		try (CsvWriter writer = new CsvWriter(new FileOutputStream("MyFile.csv"), new CsvFormat().setSeparator(';').setStringQuote('\"'))) {
 			writer.writeValues(new Object[] {
 				"abc",
 				"def",
 				"123"
 			});
+			
 			writer.writeValues(new Object[] {
-				"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"´`^°²³*#.,:=+-~_|",
+				"ghi",
 				"jkl",
-				"4\n\n;\"56"
+				"456"
 			});
-			writer.close();
-			writer = null;
-   
-			String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\n;\"\"56\"\n";
-			Assert.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), "UTF-8"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.fail(e.getMessage());
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
 		}
