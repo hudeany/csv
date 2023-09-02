@@ -7,6 +7,7 @@ CsvWriter can write .csv files and supports the same features as CsvReader.
 There are also some other convenient optional configuration values.
 
 For feature documentation and examples see wiki or javadoc.
+
 Features
 
     Using data streams instead of files only
