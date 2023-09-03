@@ -1,4 +1,4 @@
-package de.soderer.utilities;
+package de.soderer.utilities.csv.utilities;
 
 import java.io.FilterInputStream;
 import java.io.IOException;

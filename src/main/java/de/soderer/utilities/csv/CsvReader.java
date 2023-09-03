@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.soderer.utilities.BasicReader;
 import de.soderer.utilities.csv.CsvFormat.QuoteMode;
+import de.soderer.utilities.csv.utilities.BasicReader;
 
 /**
  * The Class CsvReader.
