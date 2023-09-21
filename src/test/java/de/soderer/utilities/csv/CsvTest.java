@@ -8,8 +8,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+@SuppressWarnings("static-method")
 public class CsvTest {
-
 	@Test
 	public void test1() {
 		CsvReader reader = null;
@@ -129,7 +129,7 @@ public class CsvTest {
 
 			reader.readAll();
 			Assert.fail("Exception expected");
-		} catch (final Exception e) {
+		} catch (@SuppressWarnings("unused") final Exception e) {
 			// Exception expected
 		} finally {
 			if (reader != null) {
