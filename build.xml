@@ -76,9 +76,8 @@
 
 		<junit printsummary="yes" haltonfailure="yes">
 			<classpath refid="test.classpath" />
-			<classpath location="src/test/java" />
-
 			<batchtest todir="build">
+				<formatter type="plain" usefile="true"/>
 				<fileset dir="src/test/java">
 					<include name="**/*Test*.java" />
 				</fileset>
@@ -89,5 +88,11 @@
 	<target name="cleanup_after" depends="create_jar, test">
 		<delete dir="${buildPath}/bin" />
 		<delete dir="${buildPath}/testbin" />
+
+		<delete includeEmptyDirs="true">
+			<fileset dir="${buildPath}">
+				<include name="TEST-*" />
+			</fileset>
+		</delete>
 	</target>
 </project>
