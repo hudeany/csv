@@ -67,7 +67,6 @@
 			</fileset>
 			<fileset dir="${buildPath}">
 				<include name="*.jar" />
-				<exclude name="*_sources.jar" />
 			</fileset>
 			<dirset dir="${buildPath}">
 				<include name="testbin" />
