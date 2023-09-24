@@ -66,7 +66,8 @@ CsvWriter can write .csv files and streams and supports the same features as Csv
 		}
 
 ## Maven2 repository
-	This library is also available via Maven2 repository
+This library is also available via Maven2 repository
+ 
 	<repositories>
 		<repository>
 			<id>de.soderer</id>
