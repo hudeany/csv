@@ -367,9 +367,7 @@ public class CsvReader extends BasicReader {
 	 * @throws Exception
 	 */
 	public static List<String> parseCsvLine(final CsvFormat csvFormat, final String csvLine) throws Exception {
-		CsvReader reader = null;
-		try {
-			reader = new CsvReader(new ByteArrayInputStream(csvLine.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, csvFormat);
+		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvLine.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, csvFormat)) {
 			final List<List<String>> fullData = reader.readAll();
 			if (fullData.size() != 1) {
 				throw new Exception("Too many csv lines in data");
@@ -378,10 +376,6 @@ public class CsvReader extends BasicReader {
 			}
 		} catch (final CsvDataException e) {
 			throw e;
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
 		}
 	}
 
