@@ -38,7 +38,10 @@
 	</target>
 
 	<target name="create_jar" depends="cleanup_before, download_dependencies">
-		<javac debug="true" nowarn="true" deprecation="false" destdir="${buildPath}/bin" fork="yes" source="1.8" target="1.8" srcdir="src/main/java" includeantruntime="false" encoding="UTF-8" />
+		<javac debug="true" nowarn="true" deprecation="false" destdir="${buildPath}/bin" fork="yes" source="1.8" target="1.8" srcdir="src/main/java" includeantruntime="false" encoding="UTF-8">
+			<compilerarg value="-Xlint:unchecked" />
+			<compilerarg value="-parameters" />
+		</javac>
 
 		<jar destfile="${buildPath}/csv-${version}.jar">
 			<manifest>
@@ -77,6 +80,8 @@
 
 		<javac debug="true" nowarn="true" deprecation="false" destdir="${buildPath}/testbin" fork="yes" source="1.8" target="1.8" srcdir="src/test/java" includeantruntime="false" encoding="UTF-8">
 			<classpath refid="test.build.classpath" />
+			<compilerarg value="-Xlint:unchecked" />
+			<compilerarg value="-parameters" />
 		</javac>
 
 		<path id="test.classpath">
