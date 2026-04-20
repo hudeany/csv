@@ -132,10 +132,15 @@ public class CsvWriter implements Closeable {
 	 * Configured csv format
 	 *
 	 * @param csvFormat
+	 * @throws Exception
 	 */
-	public CsvWriter setCsvFormat(final CsvFormat csvFormat) {
-		this.csvFormat = csvFormat;
-		return this;
+	public CsvWriter setCsvFormat(final CsvFormat csvFormat) throws Exception {
+		if (csvFormat == null) {
+			throw new Exception("Invalid empty csvFormat parameter");
+		} else {
+			this.csvFormat = csvFormat;
+			return this;
+		}
 	}
 
 	/**
@@ -146,7 +151,7 @@ public class CsvWriter implements Closeable {
 	 * @throws Exception
 	 *             the exception
 	 */
-	public void writeValues(final Object... values) throws Exception {
+	public void writeValues(final Object... values) throws CsvDataException, IOException {
 		writeValues(Arrays.asList(values));
 	}
 
