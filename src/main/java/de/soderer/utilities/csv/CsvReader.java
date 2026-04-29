@@ -12,6 +12,7 @@ import java.util.Set;
 
 import de.soderer.utilities.csv.CsvFormat.QuoteMode;
 import de.soderer.utilities.csv.utilities.BasicReader;
+import de.soderer.utilities.csv.utilities.Utilities;
 
 /**
  * The Class CsvReader.
@@ -292,10 +293,14 @@ public class CsvReader extends BasicReader {
 					returnValue = returnValue.replace(csvFormat.getStringQuoteEscapeCharacter() + stringQuoteString, stringQuoteString);
 				}
 			}
-			returnValue = returnValue.replace("\r\n", "\n").replace('\r', '\n');
+			returnValue = Utilities.normalizeLinebreaks(returnValue);
 
 			if (csvFormat.isEscapeLineBreaks()) {
-				returnValue = returnValue.replace("\\n", "\n").replace("\\r", "\r");
+				try {
+					returnValue = Utilities.normalizeLinebreaks(Utilities.unescapeCSV(returnValue));
+				} catch (final Exception e) {
+					throw new CsvDataException("Unsupported escaped value in line " + readCsvLines + ": '" + returnValue + "'", readCsvLines, e);
+				}
 			}
 
 			if (!csvFormat.isEscapedStringQuoteInDataAllowed() && returnValue.indexOf(csvFormat.getStringQuote()) >= 0) {

@@ -11,13 +11,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.soderer.utilities.csv.CsvFormat.QuoteMode;
+import de.soderer.utilities.csv.utilities.Utilities;
 
 /**
  * The Class CsvWriter.
  */
 public class CsvWriter implements Closeable {
 	/** CSV data format definition */
-	private CsvFormat csvFormat;
+	private final CsvFormat csvFormat;
 
 	/** Default output encoding. */
 	public static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
@@ -129,21 +130,6 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Configured csv format
-	 *
-	 * @param csvFormat
-	 * @throws Exception
-	 */
-	public CsvWriter setCsvFormat(final CsvFormat csvFormat) throws Exception {
-		if (csvFormat == null) {
-			throw new Exception("Invalid empty csvFormat parameter");
-		} else {
-			this.csvFormat = csvFormat;
-			return this;
-		}
-	}
-
-	/**
 	 * Write a single line of data entries.
 	 *
 	 * @param values
@@ -166,9 +152,10 @@ public class CsvWriter implements Closeable {
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public void writeValues(final List<? extends Object> values) throws CsvDataException, IOException {
-		if (numberOfColumns != -1 && (values == null || numberOfColumns != values.size())) {
-			throw new CsvDataException(
-					"Inconsistent number of values after " + writtenLines + " written lines (expected: " + numberOfColumns + " was: " + (values == null ? "null" : values.size()) + ")", writtenLines);
+		if (values == null) {
+			throw new CsvDataException("Invalid empty values after " + writtenLines + " written lines (expected: " + numberOfColumns + " was: null)", writtenLines);
+		} else if (numberOfColumns != -1 && numberOfColumns != values.size()) {
+			throw new CsvDataException("Inconsistent number of values after " + writtenLines + " written lines (expected: " + numberOfColumns + " was: " + values.size() + ")", writtenLines);
 		}
 
 		if (outputWriter == null) {
@@ -231,7 +218,7 @@ public class CsvWriter implements Closeable {
 		}
 
 		if (escapeLineBreaks) {
-			valueString = valueString.replace("\r\n", "\\n").replace("\n", "\\n").replace("\r", "\\n");
+			valueString = Utilities.escapeCSV(Utilities.normalizeLinebreaks(valueString));
 		}
 
 		final boolean valueNeedsQuotation =
@@ -354,9 +341,16 @@ public class CsvWriter implements Closeable {
 				if (value != null) {
 					String valueString = value.toString();
 					if (escapeLineBreaks) {
-						valueString = valueString.replace("\r\n", "\\n").replace("\n", "\\n").replace("\r", "\\n");
+						valueString = Utilities.escapeCSV(Utilities.normalizeLinebreaks(valueString));
 					}
-					if (valueString.contains(separatorString) || valueString.contains("\r") || valueString.contains("\n") || valueString.contains(stringQuoteString)) {
+
+					final boolean valueNeedsQuotation =
+							valueString.contains(stringQuoteString)
+							|| valueString.contains(separatorString)
+							|| valueString.contains("\r")
+							|| valueString.contains("\n");
+
+					if (valueNeedsQuotation) {
 						returnValue.append(stringQuoteString);
 						returnValue.append(valueString.replace(stringQuoteString, doubleStringQuoteString));
 						returnValue.append(stringQuoteString);

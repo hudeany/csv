@@ -12,7 +12,7 @@ import org.junit.Test;
 public class CsvTest {
 	@Test
 	public void test1() {
-		final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\r\n;\"\"56\"";
+		final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\r\n;\"\"56\"";
 
 		final CsvFormat csvFormat = new CsvFormat()
 				.setSeparator(';');
@@ -181,7 +181,7 @@ public class CsvTest {
 						"4\n\n;\"56"
 				});
 			}
-			final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\\n\\n;\"\"56\"\n";
+			final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\\n\\n;\"\"56\"\n";
 			Assert.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -205,7 +205,7 @@ public class CsvTest {
 						"4\n\n;\"56"
 				});
 			}
-			final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\\\"´`^°²³*#.,:=+-~_|\";jkl;\"4\\n\\n;\\\"56\"\n";
+			final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\\\<>(){}[]'\\\"´`^°²³*#.,:=+-~_|\";jkl;\"4\\n\\n;\\\"56\"\n";
 			Assert.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
 		} catch (final Exception e) {
 			e.printStackTrace();
