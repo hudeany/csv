@@ -5,8 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
 public class CsvTest {
@@ -19,15 +19,15 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("def", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
-			Assert.assertEquals("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"´`^°²³*#.,:=+-~_|", dataLines.get(1).get(0));
-			Assert.assertEquals("jkl", dataLines.get(1).get(1));
-			Assert.assertEquals("4\n\n;\"56", dataLines.get(1).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("def", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\<>(){}[]'\"´`^°²³*#.,:=+-~_|", dataLines.get(1).get(0));
+			Assertions.assertEquals("jkl", dataLines.get(1).get(1));
+			Assertions.assertEquals("4\n\n;\"56", dataLines.get(1).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -41,11 +41,11 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("d\"ef", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("d\"ef", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
 		} catch (final Exception e) {
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -60,14 +60,14 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("def", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
-			Assert.assertEquals("abc", dataLines.get(1).get(0));
-			Assert.assertEquals("def", dataLines.get(1).get(1));
-			Assert.assertEquals(null, dataLines.get(1).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("def", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(1).get(0));
+			Assertions.assertEquals("def", dataLines.get(1).get(1));
+			Assertions.assertEquals(null, dataLines.get(1).get(2));
 		} catch (final Exception e) {
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -83,7 +83,7 @@ public class CsvTest {
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			reader.readAll();
 		} catch (final Exception e) {
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -97,7 +97,7 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			reader.readAll();
-			Assert.fail("Exception expected");
+			Assertions.fail("Exception expected");
 		} catch (@SuppressWarnings("unused") final Exception e) {
 			// Exception expected
 		}
@@ -114,14 +114,14 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("def", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
-			Assert.assertEquals("abc", dataLines.get(1).get(0));
-			Assert.assertEquals("def", dataLines.get(1).get(1));
-			Assert.assertEquals(null, dataLines.get(1).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("def", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(1).get(0));
+			Assertions.assertEquals("def", dataLines.get(1).get(1));
+			Assertions.assertEquals(null, dataLines.get(1).get(2));
 		} catch (final Exception e) {
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -137,11 +137,11 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("123", dataLines.get(0).get(0));
-			Assert.assertEquals("ab\"c", dataLines.get(0).get(1));
-			Assert.assertEquals("456", dataLines.get(0).get(2));
+			Assertions.assertEquals("123", dataLines.get(0).get(0));
+			Assertions.assertEquals("ab\"c", dataLines.get(0).get(1));
+			Assertions.assertEquals("456", dataLines.get(0).get(2));
 		} catch (final Exception e) {
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -157,11 +157,11 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("123", dataLines.get(0).get(0));
-			Assert.assertEquals("abc", dataLines.get(0).get(1));
-			Assert.assertEquals("456", dataLines.get(0).get(2));
+			Assertions.assertEquals("123", dataLines.get(0).get(0));
+			Assertions.assertEquals("abc", dataLines.get(0).get(1));
+			Assertions.assertEquals("456", dataLines.get(0).get(2));
 		} catch (final Exception e) {
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -182,10 +182,10 @@ public class CsvTest {
 				});
 			}
 			final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\\n\\n;\"\"56\"\n";
-			Assert.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
+			Assertions.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -206,10 +206,10 @@ public class CsvTest {
 				});
 			}
 			final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\\\<>(){}[]'\\\"´`^°²³*#.,:=+-~_|\";jkl;\"4\\n\\n;\\\"56\"\n";
-			Assert.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
+			Assertions.assertEquals(csvData, new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -222,12 +222,12 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals(" ", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals(" ", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -241,12 +241,12 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -260,12 +260,12 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -278,12 +278,12 @@ public class CsvTest {
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals(" ", dataLines.get(0).get(1));
-			Assert.assertEquals("123", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals(" ", dataLines.get(0).get(1));
+			Assertions.assertEquals("123", dataLines.get(0).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -291,10 +291,10 @@ public class CsvTest {
 	public void testSpecialQuotation() {
 		try {
 			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "\"abc\\\"123\"");
-			Assert.assertEquals("abc\"123", dataLine.get(0));
+			Assertions.assertEquals("abc\"123", dataLine.get(0));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -302,9 +302,9 @@ public class CsvTest {
 	public void testQuotationError1() {
 		try {
 			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "abc\\\"123");
-			Assert.fail("Missing expected exception");
+			Assertions.fail("Missing expected exception");
 		} catch (final Exception e) {
-			Assert.assertTrue(e.getMessage().contains("line 1"));
+			Assertions.assertTrue(e.getMessage().contains("line 1"));
 		}
 	}
 
@@ -312,9 +312,9 @@ public class CsvTest {
 	public void testQuotationError2() {
 		try {
 			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "\"abc\\\"\"123");
-			Assert.fail("Missing expected exception");
+			Assertions.fail("Missing expected exception");
 		} catch (final Exception e) {
-			Assert.assertTrue(e.getMessage().contains("line 1"));
+			Assertions.assertTrue(e.getMessage().contains("line 1"));
 		}
 	}
 
@@ -322,9 +322,9 @@ public class CsvTest {
 	public void testQuotationError3() {
 		try {
 			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "abc\"");
-			Assert.fail("Missing expected exception");
+			Assertions.fail("Missing expected exception");
 		} catch (final Exception e) {
-			Assert.assertTrue(e.getMessage().contains("line 1"));
+			Assertions.assertTrue(e.getMessage().contains("line 1"));
 		}
 	}
 
@@ -332,9 +332,9 @@ public class CsvTest {
 	public void testQuotationError4() {
 		try {
 			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('"'), "abc\\\"123");
-			Assert.fail("Missing expected exception");
+			Assertions.fail("Missing expected exception");
 		} catch (final Exception e) {
-			Assert.assertTrue(e.getMessage().contains("line 1"));
+			Assertions.assertTrue(e.getMessage().contains("line 1"));
 		}
 	}
 
@@ -343,22 +343,22 @@ public class CsvTest {
 		final String csvData = "abc;def;1\nabc;def;2\n\n;;\nabc;def;3\n \nabc;def;4\n";
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), new CsvFormat().setSeparator(';').setIgnoreEmptyLines(true))) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals(dataLines.size(), 4);
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("def", dataLines.get(0).get(1));
-			Assert.assertEquals("1", dataLines.get(0).get(2));
-			Assert.assertEquals("abc", dataLines.get(1).get(0));
-			Assert.assertEquals("def", dataLines.get(1).get(1));
-			Assert.assertEquals("2", dataLines.get(1).get(2));
-			Assert.assertEquals("abc", dataLines.get(2).get(0));
-			Assert.assertEquals("def", dataLines.get(2).get(1));
-			Assert.assertEquals("3", dataLines.get(2).get(2));
-			Assert.assertEquals("abc", dataLines.get(3).get(0));
-			Assert.assertEquals("def", dataLines.get(3).get(1));
-			Assert.assertEquals("4", dataLines.get(3).get(2));
+			Assertions.assertEquals(dataLines.size(), 4);
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("def", dataLines.get(0).get(1));
+			Assertions.assertEquals("1", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(1).get(0));
+			Assertions.assertEquals("def", dataLines.get(1).get(1));
+			Assertions.assertEquals("2", dataLines.get(1).get(2));
+			Assertions.assertEquals("abc", dataLines.get(2).get(0));
+			Assertions.assertEquals("def", dataLines.get(2).get(1));
+			Assertions.assertEquals("3", dataLines.get(2).get(2));
+			Assertions.assertEquals("abc", dataLines.get(3).get(0));
+			Assertions.assertEquals("def", dataLines.get(3).get(1));
+			Assertions.assertEquals("4", dataLines.get(3).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -367,25 +367,25 @@ public class CsvTest {
 		final String csvData = "abc;def;1\nabc;def;2\n;;\nabc;def;3\nabc;def;4\n";
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), new CsvFormat().setSeparator(';').setIgnoreEmptyLines(false))) {
 			final List<List<String>> dataLines = reader.readAll();
-			Assert.assertEquals(dataLines.size(), 5);
-			Assert.assertEquals("abc", dataLines.get(0).get(0));
-			Assert.assertEquals("def", dataLines.get(0).get(1));
-			Assert.assertEquals("1", dataLines.get(0).get(2));
-			Assert.assertEquals("abc", dataLines.get(1).get(0));
-			Assert.assertEquals("def", dataLines.get(1).get(1));
-			Assert.assertEquals("2", dataLines.get(1).get(2));
-			Assert.assertEquals("", dataLines.get(2).get(0));
-			Assert.assertEquals("", dataLines.get(2).get(1));
-			Assert.assertEquals("", dataLines.get(2).get(2));
-			Assert.assertEquals("abc", dataLines.get(3).get(0));
-			Assert.assertEquals("def", dataLines.get(3).get(1));
-			Assert.assertEquals("3", dataLines.get(3).get(2));
-			Assert.assertEquals("abc", dataLines.get(4).get(0));
-			Assert.assertEquals("def", dataLines.get(4).get(1));
-			Assert.assertEquals("4", dataLines.get(4).get(2));
+			Assertions.assertEquals(dataLines.size(), 5);
+			Assertions.assertEquals("abc", dataLines.get(0).get(0));
+			Assertions.assertEquals("def", dataLines.get(0).get(1));
+			Assertions.assertEquals("1", dataLines.get(0).get(2));
+			Assertions.assertEquals("abc", dataLines.get(1).get(0));
+			Assertions.assertEquals("def", dataLines.get(1).get(1));
+			Assertions.assertEquals("2", dataLines.get(1).get(2));
+			Assertions.assertEquals("", dataLines.get(2).get(0));
+			Assertions.assertEquals("", dataLines.get(2).get(1));
+			Assertions.assertEquals("", dataLines.get(2).get(2));
+			Assertions.assertEquals("abc", dataLines.get(3).get(0));
+			Assertions.assertEquals("def", dataLines.get(3).get(1));
+			Assertions.assertEquals("3", dataLines.get(3).get(2));
+			Assertions.assertEquals("abc", dataLines.get(4).get(0));
+			Assertions.assertEquals("def", dataLines.get(4).get(1));
+			Assertions.assertEquals("4", dataLines.get(4).get(2));
 		} catch (final Exception e) {
 			e.printStackTrace();
-			Assert.fail(e.getMessage());
+			Assertions.fail(e.getMessage());
 		}
 	}
 }
