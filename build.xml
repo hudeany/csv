@@ -9,8 +9,6 @@
 	<property name="buildPath" value="build" />
 	<echo message="buildPath: ${buildPath}" />
 
-	<target name="build_jar" depends="cleanup_before, create_jar, cleanup_after, test" />
-
 	<target name="cleanup_before">
 		<mkdir dir="${buildPath}" />
 
@@ -23,24 +21,27 @@
 		<mkdir dir="${buildPath}/bin" />
 		<mkdir dir="${buildPath}/testbin" />
 	</target>
-	
+
 	<target name="download_dependencies">
 		<mkdir dir="lib_test/" />
+
 		<delete includeEmptyDirs="true">
 			<fileset dir="lib_test/">
 				<include name="*" />
 			</fileset>
 		</delete>
-		
-		<get src="https://repo1.maven.org/maven2/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.jar" dest="lib_test/" />
+
+		<get src="https://repo1.maven.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar" dest="lib_test/" />
 		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar" dest="lib_test/" />
 		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar" dest="lib_test/" />
 	</target>
 
 	<target name="create_jar" depends="cleanup_before, download_dependencies">
-		<javac debug="true" nowarn="true" deprecation="false" destdir="${buildPath}/bin" fork="yes" source="17" target="17" srcdir="src/main/java" includeantruntime="false" encoding="UTF-8">
+		<javac destdir="${buildPath}/bin" srcdir="src/main/java" includeantruntime="false" source="17" target="17" encoding="UTF-8" debug="true">
 			<compilerarg value="-Xlint:unchecked" />
 			<compilerarg value="-parameters" />
 		</javac>
@@ -51,65 +52,50 @@
 			</manifest>
 
 			<fileset dir="${buildPath}/bin" />
-
-			<fileset dir="" includes="LICENSE.txt"/>
+			<fileset dir="" includes="LICENSE.txt" />
 		</jar>
-		<checksum file="${buildPath}/csv-${version}.jar" fileext=".md5" forceOverwrite="yes" />
-		<checksum file="${buildPath}/csv-${version}.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 
-		<jar destfile="${buildPath}/csv-${version}_sources.jar">
-			<manifest>
-				<attribute name="Version" value="${version}" />
-			</manifest>
-
-			<fileset dir="src/main/java" includes="**/*.java"/>
-
-			<fileset dir="" includes="LICENSE.txt"/>
-		</jar>
-		<checksum file="${buildPath}/csv-${version}_sources.jar" fileext=".md5" forceOverwrite="yes"/>
-		<checksum file="${buildPath}/csv-${version}_sources.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 	</target>
 
 	<target name="test" depends="create_jar">
-		<path id="test.build.classpath">
+		<path id="test.libs">
 			<fileset dir="lib_test">
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="${buildPath}">
 				<include name="*.jar" />
 			</fileset>
 		</path>
 
-		<javac debug="true" nowarn="true" deprecation="false" destdir="${buildPath}/testbin" fork="yes" source="17" target="17" srcdir="src/test/java" includeantruntime="false" encoding="UTF-8">
-			<classpath refid="test.build.classpath" />
-			<compilerarg value="-Xlint:unchecked" />
-			<compilerarg value="-parameters" />
-		</javac>
+		<path id="runtime.classpath">
+			<fileset dir="${buildPath}">
+				<include name="*.jar" />
+			</fileset>
+		</path>
 
 		<path id="test.classpath">
-			<fileset dir="lib_test">
-				<include name="*.jar" />
-			</fileset>
-			<fileset dir="${buildPath}">
-				<include name="*.jar" />
-			</fileset>
-			<dirset dir="${buildPath}">
-				<include name="testbin" />
-			</dirset>
+			<path refid="test.libs" />
+			<path refid="runtime.classpath" />
+			<pathelement path="${buildPath}/testbin" />
 		</path>
 
-		<junit printsummary="yes" haltonfailure="yes">
+		<javac destdir="${buildPath}/testbin" srcdir="src/test/java" includeantruntime="false" source="17" target="17" failonerror="true">
 			<classpath refid="test.classpath" />
-			<batchtest todir="build">
-				<formatter type="plain" usefile="true"/>
-				<fileset dir="src/test/java">
-					<include name="**/*Test*.java" />
+			<include name="**/*.java" />
+		</javac>
+
+		<fileset id="testbin.classes" dir="${buildPath}/testbin">
+			<include name="**/*.class" />
+		</fileset>
+
+		<junitlauncher printSummary="true">
+			<classpath refid="test.classpath" />
+			<testclasses outputdir="${buildPath}">
+				<fileset dir="${buildPath}/testbin">
+					<include name="**/*.class" />
 				</fileset>
-			</batchtest>
-		</junit>
+			</testclasses>
+		</junitlauncher>
 	</target>
 
-	<target name="cleanup_after" depends="create_jar, test">
+	<target name="cleanup_after" depends="test">
 		<delete dir="${buildPath}/bin" />
 		<delete dir="${buildPath}/testbin" />
 
@@ -119,4 +105,6 @@
 			</fileset>
 		</delete>
 	</target>
+
+	<target name="build_jar" depends="cleanup_before, create_jar, cleanup_after, test" />
 </project>
