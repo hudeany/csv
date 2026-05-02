@@ -2,7 +2,7 @@
 <project default="build_jar" name="Create all Jars for Project CsvReader">
 	<echo message="Java Version: ${java.version}" />
 	<echo message="Ant Version: ${ant.version}" />
-	
+
 	<loadfile property="version" srcFile="build.version" failonerror="false" />
 	<property name="version" value="noVersion" />
 
@@ -99,6 +99,10 @@
 			<include name="**/*.java" />
 		</javac>
 
+		<copy todir="${buildPath}/testbin">
+			<fileset dir="src/test/resources" erroronmissingdir="false" />
+		</copy>
+
 		<fileset id="testbin.classes" dir="${buildPath}/testbin">
 			<include name="**/*.class" />
 		</fileset>
@@ -111,7 +115,7 @@
 				</fileset>
 			</testclasses>
 		</junitlauncher>
-		<fail if="test.failed" message="Tests fehlgeschlagen!" />
+		<fail if="test.failed" message="Tests failed!" />
 	</target>
 
 	<target name="cleanup_after" depends="test">
