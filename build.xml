@@ -52,7 +52,7 @@
 		</javac>
 
 		<copy todir="${buildPath}/bin">
-			<fileset dir="src/main/resources" />
+			<fileset dir="src/main/resources" erroronmissingdir="false" />
 		</copy>
 
 		<jar destfile="${buildPath}/csv-${version}.jar">
