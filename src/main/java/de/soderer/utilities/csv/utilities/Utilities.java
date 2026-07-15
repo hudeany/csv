@@ -120,8 +120,8 @@ public class Utilities {
 						if (i + 9 < length) {
 							final String hex = javaEscapedText.substring(i + 2, i + 10);
 							try {
-								final int code = Integer.parseInt(hex, 32);
-								unescapedTextBuilder.append((char) code);
+								final int code = Integer.parseInt(hex, 16);
+								unescapedTextBuilder.append(Character.toChars(code));
 								i += 9;
 							} catch (final NumberFormatException e) {
 								throw new Exception("Invalid unicode sequence at character index " + i + " ('" + "\\U" + hex + "')", e);
