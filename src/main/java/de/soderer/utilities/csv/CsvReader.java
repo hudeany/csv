@@ -138,7 +138,8 @@ public class CsvReader extends BasicReader {
 
 		while ((nextCharacter = readNextCharacter()) != null) {
 			final char nextChar = nextCharacter;
-			if (csvFormat.getQuoteMode() != QuoteMode.NO_QUOTE && nextChar == csvFormat.getStringQuote()) {
+			if (csvFormat.getQuoteMode() != QuoteMode.NO_QUOTE && nextChar == csvFormat.getStringQuote()
+					&& (isQuotedString || nextValue.toString().trim().isEmpty())) {
 				if (csvFormat.getStringQuoteEscapeCharacter() != csvFormat.getStringQuote()) {
 					if (previousCharacter != csvFormat.getStringQuoteEscapeCharacter()) {
 						insideString = !insideString;
@@ -288,7 +289,7 @@ public class CsvReader extends BasicReader {
 				if (returnValue.contains(stringQuoteString)) {
 					returnValue = returnValue.trim();
 				}
-				if (returnValue.charAt(0) == csvFormat.getStringQuote() && returnValue.charAt(returnValue.length() - 1) == csvFormat.getStringQuote()) {
+				if (returnValue.length() > 1 && returnValue.charAt(0) == csvFormat.getStringQuote() && returnValue.charAt(returnValue.length() - 1) == csvFormat.getStringQuote()) {
 					returnValue = returnValue.substring(1, returnValue.length() - 1);
 					returnValue = returnValue.replace(csvFormat.getStringQuoteEscapeCharacter() + stringQuoteString, stringQuoteString);
 				}
