@@ -301,10 +301,11 @@ public class CsvTest {
 	@Test
 	public void testQuotationError1() {
 		try {
-			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "abc\\\"123");
-			Assertions.fail("Missing expected exception");
+			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "abc\\\"123");
+			Assertions.assertEquals("abc\"123", dataLine.get(0));
 		} catch (final Exception e) {
-			Assertions.assertTrue(e.getMessage().contains("line 1"));
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
 		}
 	}
 
@@ -321,20 +322,22 @@ public class CsvTest {
 	@Test
 	public void testQuotationError3() {
 		try {
-			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "abc\"");
-			Assertions.fail("Missing expected exception");
+			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('\\'), "abc\"");
+			Assertions.assertEquals("abc\"", dataLine.get(0));
 		} catch (final Exception e) {
-			Assertions.assertTrue(e.getMessage().contains("line 1"));
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
 		}
 	}
 
 	@Test
 	public void testQuotationError4() {
 		try {
-			CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('"'), "abc\\\"123");
-			Assertions.fail("Missing expected exception");
+			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().setSeparator(';').setStringQuote('"').setStringQuoteEscapeCharacter('"'), "abc\\\"123");
+			Assertions.assertEquals("abc\"123", dataLine.get(0));
 		} catch (final Exception e) {
-			Assertions.assertTrue(e.getMessage().contains("line 1"));
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
 		}
 	}
 
