@@ -23,7 +23,10 @@
 			</fileset>
 		</delete>
 
+		<delete dir="${buildPath}/bin" />
 		<mkdir dir="${buildPath}/bin" />
+
+		<delete dir="${buildPath}/testbin" />
 		<mkdir dir="${buildPath}/testbin" />
 	</target>
 
