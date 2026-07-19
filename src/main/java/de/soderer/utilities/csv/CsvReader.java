@@ -99,13 +99,23 @@ public class CsvReader extends BasicReader {
 	 * @param csvFormat
 	 * @throws Exception
 	 */
-	public CsvReader setCsvFormat(final CsvFormat csvFormat) throws Exception {
+	public void setCsvFormat(final CsvFormat csvFormat) throws Exception {
 		if (csvFormat == null) {
 			throw new Exception("Invalid empty csvFormat parameter");
 		} else {
 			this.csvFormat = csvFormat;
-			return this;
 		}
+	}
+
+	/**
+	 * Configured csv format
+	 *
+	 * @param csvFormat
+	 * @throws Exception
+	 */
+	public CsvReader withCsvFormat(final CsvFormat newCsvFormat) throws Exception {
+		setCsvFormat(newCsvFormat);
+		return this;
 	}
 
 	/**

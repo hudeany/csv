@@ -111,15 +111,19 @@ public class CsvFormat {
 		return separator;
 	}
 
-	public CsvFormat setSeparator(final char separator) {
+	public void setSeparator(final char separator) {
 		if (separator == '\r' || separator == '\n') {
 			throw new IllegalArgumentException("Separator '" + separator + "' is invalid");
 		} else if (quoteMode != QuoteMode.NO_QUOTE && separator == stringQuote) {
 			throw new IllegalArgumentException("Separator '" + separator + "' is invalid");
 		} else {
 			this.separator = separator;
-			return this;
 		}
+	}
+
+	public CsvFormat withSeparator(final char newSeparator) {
+		setSeparator(newSeparator);
+		return this;
 	}
 
 	public char getStringQuote() {
@@ -132,7 +136,7 @@ public class CsvFormat {
 	 *
 	 * @param stringQuote
 	 */
-	public CsvFormat setStringQuote(final Character stringQuote) {
+	public void setStringQuote(final Character stringQuote) {
 		if (stringQuote != null) {
 			if (stringQuote == '\r' || stringQuote == '\n' || separator == stringQuote) {
 				throw new IllegalArgumentException("StringQuote '" + stringQuote + "' is invalid");
@@ -140,33 +144,44 @@ public class CsvFormat {
 				this.stringQuote = stringQuote;
 				stringQuoteEscapeCharacter = stringQuote;
 				quoteMode = QuoteMode.QUOTE_IF_NEEDED;
-				return this;
 			}
 		} else {
 			quoteMode = QuoteMode.NO_QUOTE;
-			return this;
 		}
+	}
+
+	public CsvFormat withStringQuote(final Character newStringQuote) {
+		setStringQuote(newStringQuote);
+		return this;
 	}
 
 	public char getStringQuoteEscapeCharacter() {
 		return stringQuoteEscapeCharacter;
 	}
 
-	public CsvFormat setStringQuoteEscapeCharacter(final char stringQuoteEscapeCharacter) {
+	public void setStringQuoteEscapeCharacter(final char stringQuoteEscapeCharacter) {
 		if (stringQuoteEscapeCharacter == separator || stringQuoteEscapeCharacter == '\r' || stringQuoteEscapeCharacter == '\n') {
 			throw new IllegalArgumentException("Stringquote escape character '" + stringQuoteEscapeCharacter + "' is invalid");
 		} else {
 			this.stringQuoteEscapeCharacter = stringQuoteEscapeCharacter;
-			return this;
 		}
+	}
+
+	public CsvFormat withStringQuoteEscapeCharacter(final char newStringQuoteEscapeCharacter) {
+		setStringQuoteEscapeCharacter(newStringQuoteEscapeCharacter);
+		return this;
 	}
 
 	public boolean isLineBreakInDataAllowed() {
 		return lineBreakInDataAllowed;
 	}
 
-	public CsvFormat setLineBreakInDataAllowed(final boolean lineBreakInDataAllowed) {
+	public void setLineBreakInDataAllowed(final boolean lineBreakInDataAllowed) {
 		this.lineBreakInDataAllowed = lineBreakInDataAllowed;
+	}
+
+	public CsvFormat withLineBreakInDataAllowed(final boolean newLineBreakInDataAllowed) {
+		setLineBreakInDataAllowed(newLineBreakInDataAllowed);
 		return this;
 	}
 
@@ -174,8 +189,12 @@ public class CsvFormat {
 		return escapedStringQuoteInDataAllowed;
 	}
 
-	public CsvFormat setEscapedStringQuoteInDataAllowed(final boolean escapedStringQuoteInDataAllowed) {
+	public void setEscapedStringQuoteInDataAllowed(final boolean escapedStringQuoteInDataAllowed) {
 		this.escapedStringQuoteInDataAllowed = escapedStringQuoteInDataAllowed;
+	}
+
+	public CsvFormat withEscapedStringQuoteInDataAllowed(final boolean newEscapedStringQuoteInDataAllowed) {
+		setEscapedStringQuoteInDataAllowed(newEscapedStringQuoteInDataAllowed);
 		return this;
 	}
 
@@ -183,8 +202,12 @@ public class CsvFormat {
 		return fillMissingTrailingColumnsWithNull;
 	}
 
-	public CsvFormat setFillMissingTrailingColumnsWithNull(final boolean fillMissingTrailingColumnsWithNull) {
+	public void setFillMissingTrailingColumnsWithNull(final boolean fillMissingTrailingColumnsWithNull) {
 		this.fillMissingTrailingColumnsWithNull = fillMissingTrailingColumnsWithNull;
+	}
+
+	public CsvFormat withFillMissingTrailingColumnsWithNull(final boolean newFillMissingTrailingColumnsWithNull) {
+		setFillMissingTrailingColumnsWithNull(newFillMissingTrailingColumnsWithNull);
 		return this;
 	}
 
@@ -192,8 +215,12 @@ public class CsvFormat {
 		return removeSurplusEmptyTrailingColumns;
 	}
 
-	public CsvFormat setRemoveSurplusEmptyTrailingColumns(final boolean removeSurplusEmptyTrailingColumns) {
+	public void setRemoveSurplusEmptyTrailingColumns(final boolean removeSurplusEmptyTrailingColumns) {
 		this.removeSurplusEmptyTrailingColumns = removeSurplusEmptyTrailingColumns;
+	}
+
+	public CsvFormat withRemoveSurplusEmptyTrailingColumns(final boolean newRemoveSurplusEmptyTrailingColumns) {
+		setRemoveSurplusEmptyTrailingColumns(newRemoveSurplusEmptyTrailingColumns);
 		return this;
 	}
 
@@ -201,8 +228,12 @@ public class CsvFormat {
 		return alwaysTrim;
 	}
 
-	public CsvFormat setAlwaysTrim(final boolean alwaysTrim) {
+	public void setAlwaysTrim(final boolean alwaysTrim) {
 		this.alwaysTrim = alwaysTrim;
+	}
+
+	public CsvFormat withAlwaysTrim(final boolean newAlwaysTrim) {
+		setAlwaysTrim(newAlwaysTrim);
 		return this;
 	}
 
@@ -210,8 +241,12 @@ public class CsvFormat {
 		return ignoreEmptyLines;
 	}
 
-	public CsvFormat setIgnoreEmptyLines(final boolean ignoreEmptyLines) {
+	public void setIgnoreEmptyLines(final boolean ignoreEmptyLines) {
 		this.ignoreEmptyLines = ignoreEmptyLines;
+	}
+
+	public CsvFormat withIgnoreEmptyLines(final boolean newIgnoreEmptyLines) {
+		setIgnoreEmptyLines(newIgnoreEmptyLines);
 		return this;
 	}
 
@@ -219,36 +254,48 @@ public class CsvFormat {
 		return quoteMode;
 	}
 
-	public CsvFormat setQuoteMode(final QuoteMode quoteMode) {
+	public void setQuoteMode(final QuoteMode quoteMode) {
 		if (quoteMode == null) {
 			throw new IllegalArgumentException("Given quoteMode is invalid");
 		} else if (quoteMode != QuoteMode.NO_QUOTE && separator == stringQuote) {
 			throw new IllegalArgumentException("StringQuote '" + stringQuote + "' is invalid");
 		} else {
 			this.quoteMode = quoteMode;
-			return this;
 		}
+	}
+
+	public CsvFormat withQuoteMode(final QuoteMode newQuoteMode) {
+		setQuoteMode(newQuoteMode);
+		return this;
 	}
 
 	public String getLineBreak() {
 		return lineBreak;
 	}
 
-	public CsvFormat setLineBreak(final String lineBreak) {
+	public void setLineBreak(final String lineBreak) {
 		if (!"\r".equals(lineBreak) && !"\n".equals(lineBreak) && !"\r\n".equals(lineBreak)) {
 			throw new IllegalArgumentException("Given linebreak is invalid");
 		} else {
 			this.lineBreak = lineBreak;
-			return this;
 		}
+	}
+
+	public CsvFormat withLineBreak(final String newLineBreak) {
+		setLineBreak(newLineBreak);
+		return this;
 	}
 
 	public boolean isHeaderInFirstLine() {
 		return headerInFirstLine;
 	}
 
-	public CsvFormat setHeaderInFirstLine(final boolean headerInFirstLine) {
+	public void setHeaderInFirstLine(final boolean headerInFirstLine) {
 		this.headerInFirstLine = headerInFirstLine;
+	}
+
+	public CsvFormat withHeaderInFirstLine(final boolean newHeaderInFirstLine) {
+		setHeaderInFirstLine(newHeaderInFirstLine);
 		return this;
 	}
 
@@ -258,5 +305,10 @@ public class CsvFormat {
 
 	public void setEscapeLineBreaks(final boolean escapeLineBreaks) {
 		this.escapeLineBreaks = escapeLineBreaks;
+	}
+
+	public CsvFormat withEscapeLineBreaks(final boolean newEscapeLineBreaks) {
+		setEscapeLineBreaks(newEscapeLineBreaks);
+		return this;
 	}
 }

@@ -137,8 +137,9 @@ public class CsvWriter implements Closeable {
 	 * @throws Exception
 	 *             the exception
 	 */
-	public void writeValues(final Object... values) throws CsvDataException, IOException {
+	public CsvWriter writeValues(final Object... values) throws CsvDataException, IOException {
 		writeValues(Arrays.asList(values));
+		return this;
 	}
 
 	/**
@@ -151,7 +152,7 @@ public class CsvWriter implements Closeable {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public void writeValues(final List<? extends Object> values) throws CsvDataException, IOException {
+	public CsvWriter writeValues(final List<? extends Object> values) throws CsvDataException, IOException {
 		if (values == null) {
 			throw new CsvDataException("Invalid empty values after " + writtenLines + " written lines (expected: " + numberOfColumns + " was: null)", writtenLines);
 		} else if (numberOfColumns != -1 && numberOfColumns != values.size()) {
@@ -186,6 +187,7 @@ public class CsvWriter implements Closeable {
 
 		writtenLines++;
 		numberOfColumns = values.size();
+		return this;
 	}
 
 	/**
@@ -196,10 +198,11 @@ public class CsvWriter implements Closeable {
 	 * @throws Exception
 	 *             the exception
 	 */
-	public void writeAll(final List<List<? extends Object>> valueLines) throws Exception {
+	public CsvWriter writeAll(final List<List<? extends Object>> valueLines) throws Exception {
 		for (final List<? extends Object> valuesOfLine : valueLines) {
 			writeValues(valuesOfLine);
 		}
+		return this;
 	}
 
 	/**
@@ -296,10 +299,11 @@ public class CsvWriter implements Closeable {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public void flush() throws IOException {
+	public CsvWriter flush() throws IOException {
 		if (outputWriter != null) {
 			outputWriter.flush();
 		}
+		return this;
 	}
 
 	/**
@@ -389,12 +393,32 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
+	 * Set minimumColumnSizes for beautification
+	 *
+	 * @param minimumColumnSizes
+	 */
+	public CsvWriter withMinimumColumnSizes(final int[] newMinimumColumnSizes) {
+		setMinimumColumnSizes(newMinimumColumnSizes);
+		return this;
+	}
+
+	/**
 	 * Set columnPaddings for beautification (true = right padding = left aligned)
 	 *
 	 * @param columnPaddings
 	 */
 	public void setColumnPaddings(final boolean[] columnPaddings) {
 		this.columnPaddings = columnPaddings;
+	}
+
+	/**
+	 * Set columnPaddings for beautification (true = right padding = left aligned)
+	 *
+	 * @param columnPaddings
+	 */
+	public CsvWriter withColumnPaddings(final boolean[] newColumnPaddings) {
+		setColumnPaddings(newColumnPaddings);
+		return this;
 	}
 
 	/**
