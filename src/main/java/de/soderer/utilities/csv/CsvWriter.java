@@ -1,6 +1,7 @@
 package de.soderer.utilities.csv;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,8 +30,8 @@ public class CsvWriter implements Closeable {
 	/** Current output string quote as string for internal use. */
 	private final String stringQuoteString;
 
-	/** Current output string quote two times for internal use. */
-	private final String escapedStringQuoteString;
+	/** Current output string quote escape character as string for internal use. */
+	private final String stringQuoteEscapeString;
 
 	/** Output stream. */
 	private OutputStream outputStream;
@@ -53,7 +54,7 @@ public class CsvWriter implements Closeable {
 	/** Padding locations of columns for beautification (true = right padding = left aligned) */
 	private boolean[] columnPaddings = null;
 
-	/** Use "\n" to escape linebreaks */
+	/** Use backslash escape sequences (e.g. "\\n") in values */
 	private final boolean escapeLineBreaks;
 
 	/**
@@ -110,7 +111,7 @@ public class CsvWriter implements Closeable {
 		this.encoding = encoding;
 		separatorString = Character.toString(csvFormat.getSeparator());
 		stringQuoteString = Character.toString(csvFormat.getStringQuote());
-		escapedStringQuoteString = csvFormat.getStringQuoteEscapeCharacter() + stringQuoteString;
+		stringQuoteEscapeString = Character.toString(csvFormat.getStringQuoteEscapeCharacter());
 		escapeLineBreaks = csvFormat.isEscapeLineBreaks();
 
 		if (this.encoding == null) {
@@ -231,11 +232,11 @@ public class CsvWriter implements Closeable {
 				|| valueString.contains("\n");
 
 		if (csvFormat.getQuoteMode() == QuoteMode.QUOTE_ALL_DATA
-				|| (csvFormat.getQuoteMode() == QuoteMode.QUOTE_STRINGS && value instanceof String)
+				|| (csvFormat.getQuoteMode() == QuoteMode.QUOTE_STRINGS && (value instanceof String || valueNeedsQuotation))
 				|| (csvFormat.getQuoteMode() == QuoteMode.QUOTE_IF_NEEDED && valueNeedsQuotation)) {
 			final StringBuilder escapedValue = new StringBuilder();
 			escapedValue.append(stringQuoteString);
-			escapedValue.append(valueString.replace(stringQuoteString, escapedStringQuoteString));
+			escapedValue.append(escapeQuotedContent(valueString));
 			escapedValue.append(stringQuoteString);
 			return escapedValue.toString();
 		} else if (valueNeedsQuotation) {
@@ -243,6 +244,26 @@ public class CsvWriter implements Closeable {
 		} else {
 			return valueString;
 		}
+	}
+
+	/**
+	 * Escape the content of a value, which will be enclosed in stringquotes.
+	 * If the stringquote escape character differs from the stringquote (e.g. backslash),
+	 * the escape character itself must be escaped too. Otherwise a value ending with
+	 * the escape character (e.g. the value C:\dir\) would escape the closing stringquote.
+	 * Exception: With escapeLineBreaks and a backslash as escape character, backslashes
+	 * were already doubled by Utilities.escapeCSV(), so they must not be doubled again.
+	 *
+	 * @param valueString
+	 *            the value content without enclosing stringquotes
+	 * @return the escaped value content
+	 */
+	private String escapeQuotedContent(final String valueString) {
+		String returnValue = valueString;
+		if (!stringQuoteEscapeString.equals(stringQuoteString) && !(escapeLineBreaks && "\\".equals(stringQuoteEscapeString))) {
+			returnValue = returnValue.replace(stringQuoteEscapeString, stringQuoteEscapeString + stringQuoteEscapeString);
+		}
+		return returnValue.replace(stringQuoteString, stringQuoteEscapeString + stringQuoteString);
 	}
 
 	/**
@@ -348,13 +369,17 @@ public class CsvWriter implements Closeable {
 						valueString = Utilities.escapeCSV(Utilities.normalizeLinebreaks(valueString));
 					}
 
+					// Check for stringquote only if one is configured, because contains("") is always true
 					final boolean valueNeedsQuotation =
-							valueString.contains(stringQuoteString)
+							(stringQuote != null && valueString.contains(stringQuoteString))
 							|| valueString.contains(separatorString)
 							|| valueString.contains("\r")
 							|| valueString.contains("\n");
 
 					if (valueNeedsQuotation) {
+						if (stringQuote == null) {
+							throw new IllegalArgumentException("StringQuote was deactivated but is needed for csv-value: " + valueString);
+						}
 						returnValue.append(stringQuoteString);
 						returnValue.append(valueString.replace(stringQuoteString, doubleStringQuoteString));
 						returnValue.append(stringQuoteString);
@@ -365,6 +390,66 @@ public class CsvWriter implements Closeable {
 			}
 		}
 		return returnValue.toString();
+	}
+
+	/**
+	 * Create a single csv line using the given csv format.
+	 * Counterpart of CsvReader.parseCsvLine(CsvFormat, String).
+	 * The line is created by the same escaping and quoting logic as writeValues(),
+	 * so separator, stringquote, stringquote escape character, quote mode and
+	 * escapeLineBreaks of the csv format are respected.
+	 * The returned line does not contain the trailing linebreak.
+	 *
+	 * @param csvFormat
+	 *            the csv format
+	 * @param values
+	 *            the values
+	 * @return the csv line
+	 * @throws CsvDataException
+	 *             if a value can not be written in the given csv format (e.g. quotation needed but deactivated)
+	 */
+	public static String getCsvLine(final CsvFormat csvFormat, final List<? extends Object> values) throws CsvDataException {
+		if (csvFormat == null) {
+			throw new IllegalArgumentException("Invalid empty csvFormat parameter");
+		} else if (values == null) {
+			throw new IllegalArgumentException("Invalid empty values parameter");
+		}
+
+		final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try (CsvWriter csvWriter = new CsvWriter(outputStream, StandardCharsets.UTF_8, csvFormat)) {
+			csvWriter.writeValues(values);
+			csvWriter.flush();
+		} catch (final IOException e) {
+			// Can not happen when writing into memory
+			throw new IllegalStateException("Unexpected error creating csv line: " + e.getMessage(), e);
+		}
+
+		final String csvLine = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+		// Remove the trailing linebreak added by writeValues()
+		if (csvLine.endsWith(csvFormat.getLineBreak())) {
+			return csvLine.substring(0, csvLine.length() - csvFormat.getLineBreak().length());
+		} else {
+			return csvLine;
+		}
+	}
+
+	/**
+	 * Create a single csv line using the given csv format.
+	 * See getCsvLine(CsvFormat, List).
+	 *
+	 * @param csvFormat
+	 *            the csv format
+	 * @param values
+	 *            the values
+	 * @return the csv line
+	 * @throws CsvDataException
+	 *             if a value can not be written in the given csv format (e.g. quotation needed but deactivated)
+	 */
+	public static String getCsvLine(final CsvFormat csvFormat, final Object... values) throws CsvDataException {
+		if (values == null) {
+			throw new IllegalArgumentException("Invalid empty values parameter");
+		}
+		return getCsvLine(csvFormat, Arrays.asList(values));
 	}
 
 	/**

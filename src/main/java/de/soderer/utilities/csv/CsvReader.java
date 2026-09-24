@@ -145,13 +145,18 @@ public class CsvReader extends BasicReader {
 		boolean isQuotedString = false;
 		Character nextCharacter;
 		char previousCharacter = (char) -1;
+		final boolean separateEscapeCharacter = csvFormat.getStringQuoteEscapeCharacter() != csvFormat.getStringQuote();
+		// Number of directly preceding escape characters within a quoted string
+		int precedingEscapeCharacters = 0;
 
 		while ((nextCharacter = readNextCharacter()) != null) {
 			final char nextChar = nextCharacter;
 			if (csvFormat.getQuoteMode() != QuoteMode.NO_QUOTE && nextChar == csvFormat.getStringQuote()
 					&& (isQuotedString || nextValue.toString().trim().isEmpty())) {
-				if (csvFormat.getStringQuoteEscapeCharacter() != csvFormat.getStringQuote()) {
-					if (previousCharacter != csvFormat.getStringQuoteEscapeCharacter()) {
+				if (separateEscapeCharacter) {
+					// A stringquote is only escaped by an odd number of preceding escape characters.
+					// An even number means that those escape characters escape each other, e.g. the value C:\dir\ is written as "C:\\dir\\"
+					if (precedingEscapeCharacters % 2 == 0) {
 						insideString = !insideString;
 					}
 				} else {
@@ -210,6 +215,12 @@ public class CsvReader extends BasicReader {
 				} else {
 					nextValue.append(nextChar);
 				}
+			}
+
+			if (separateEscapeCharacter && insideString && nextChar == csvFormat.getStringQuoteEscapeCharacter()) {
+				precedingEscapeCharacters++;
+			} else {
+				precedingEscapeCharacters = 0;
 			}
 
 			previousCharacter = nextCharacter;
@@ -301,7 +312,7 @@ public class CsvReader extends BasicReader {
 				}
 				if (returnValue.length() > 1 && returnValue.charAt(0) == csvFormat.getStringQuote() && returnValue.charAt(returnValue.length() - 1) == csvFormat.getStringQuote()) {
 					returnValue = returnValue.substring(1, returnValue.length() - 1);
-					returnValue = returnValue.replace(csvFormat.getStringQuoteEscapeCharacter() + stringQuoteString, stringQuoteString);
+					returnValue = unescapeQuotedContent(returnValue);
 				}
 			}
 			returnValue = Utilities.normalizeLinebreaks(returnValue);
@@ -324,6 +335,39 @@ public class CsvReader extends BasicReader {
 		}
 
 		return returnValue;
+	}
+
+	/**
+	 * Unescape the content of a quoted value (without its enclosing stringquotes).
+	 * Counterpart of CsvWriter.escapeQuotedContent().
+	 *
+	 * @param quotedContent
+	 *            the value content without enclosing stringquotes
+	 * @return the unescaped value content
+	 */
+	private String unescapeQuotedContent(final String quotedContent) {
+		final char stringQuote = csvFormat.getStringQuote();
+		final char escapeCharacter = csvFormat.getStringQuoteEscapeCharacter();
+		if (escapeCharacter == stringQuote || (csvFormat.isEscapeLineBreaks() && escapeCharacter == '\\')) {
+			// Doubled stringquotes (RFC 4180), or backslash escaping where escaped backslashes
+			// are resolved later by Utilities.unescapeCSV()
+			return quotedContent.replace(escapeCharacter + Character.toString(stringQuote), Character.toString(stringQuote));
+		} else {
+			// Single pass, so that an escaped escape character is not combined with a following character
+			final StringBuilder returnValue = new StringBuilder(quotedContent.length());
+			for (int i = 0; i < quotedContent.length(); i++) {
+				final char nextChar = quotedContent.charAt(i);
+				if (nextChar == escapeCharacter && i + 1 < quotedContent.length()
+						&& (quotedContent.charAt(i + 1) == stringQuote || quotedContent.charAt(i + 1) == escapeCharacter)) {
+					returnValue.append(quotedContent.charAt(i + 1));
+					i++;
+				} else {
+					// Escape character followed by any other character is kept as plain text
+					returnValue.append(nextChar);
+				}
+			}
+			return returnValue.toString();
+		}
 	}
 
 	private static boolean isBlank(final List<String> list) {

@@ -51,8 +51,14 @@ public class CsvFormat {
 	/** Use headers in first csv line */
 	private boolean headerInFirstLine = true;
 
-	/** Use "\\n" to escape linebreaks on csv output */
-	private boolean escapeLineBreaks = true;
+	/**
+	 * Use backslash escape sequences in values (e.g. "\n" for a linebreak, "\\" for a backslash).
+	 * Applies to csv output (escaping) and csv input (unescaping).
+	 * Disabled by default, because RFC 4180 does not know any backslash escaping,
+	 * so backslashes (e.g. in Windows paths) are plain characters and linebreaks
+	 * are written as real linebreaks within quoted values.
+	 */
+	private boolean escapeLineBreaks = false;
 
 	/**
 	 * The Enum QuoteMode.

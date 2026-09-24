@@ -14,8 +14,10 @@ public class CsvTest {
 	public void test1() {
 		final String csvData = "abc;def;123\n\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 äöüßÄÖÜµ!?§@€$%&/\\\\<>(){}[]'\"\"´`^°²³*#.,:=+-~_|\";jkl;\"4\n\r\n;\"\"56\"";
 
+		// Backslash escape sequences ("\\" in the data) are only resolved with escapeLineBreaks
 		final CsvFormat csvFormat = new CsvFormat()
-				.withSeparator(';');
+				.withSeparator(';')
+				.withEscapeLineBreaks(true);
 
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvData.getBytes(StandardCharsets.UTF_8)), csvFormat)) {
 			final List<List<String>> dataLines = reader.readAll();
@@ -169,7 +171,7 @@ public class CsvTest {
 	public void testCsvWriter1() {
 		try {
 			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			try (CsvWriter writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().withSeparator(';').withStringQuote('\"'))) {
+			try (CsvWriter writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().withSeparator(';').withStringQuote('\"').withEscapeLineBreaks(true))) {
 				writer.writeValues(new Object[] {
 						"abc",
 						"def",
@@ -193,7 +195,7 @@ public class CsvTest {
 	public void testCsvWriter2() {
 		try {
 			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			try (CsvWriter writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().withSeparator(';').withStringQuote('\"').withStringQuoteEscapeCharacter('\\'))) {
+			try (CsvWriter writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().withSeparator(';').withStringQuote('\"').withStringQuoteEscapeCharacter('\\').withEscapeLineBreaks(true))) {
 				writer.writeValues(new Object[] {
 						"abc",
 						"def",
@@ -301,7 +303,7 @@ public class CsvTest {
 	@Test
 	public void testQuotationError1() {
 		try {
-			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().withSeparator(';').withStringQuote('"').withStringQuoteEscapeCharacter('\\'), "abc\\\"123");
+			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().withSeparator(';').withStringQuote('"').withStringQuoteEscapeCharacter('\\').withEscapeLineBreaks(true), "abc\\\"123");
 			Assertions.assertEquals("abc\"123", dataLine.get(0));
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -333,7 +335,7 @@ public class CsvTest {
 	@Test
 	public void testQuotationError4() {
 		try {
-			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().withSeparator(';').withStringQuote('"').withStringQuoteEscapeCharacter('"'), "abc\\\"123");
+			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().withSeparator(';').withStringQuote('"').withStringQuoteEscapeCharacter('"').withEscapeLineBreaks(true), "abc\\\"123");
 			Assertions.assertEquals("abc\"123", dataLine.get(0));
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -389,6 +391,83 @@ public class CsvTest {
 		} catch (final Exception e) {
 			e.printStackTrace();
 			Assertions.fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testRfcDefaultBackslashesArePlainCharacters() {
+		// Without escapeLineBreaks (default) backslashes are plain characters, e.g. in Windows paths
+		try {
+			final List<String> dataLine = CsvReader.parseCsvLine(new CsvFormat().withSeparator(';'), "C:\\Users\\test;\"C:\\temp\\new\\\";abc\\\"123");
+			Assertions.assertEquals("C:\\Users\\test", dataLine.get(0));
+			Assertions.assertEquals("C:\\temp\\new\\", dataLine.get(1));
+			Assertions.assertEquals("abc\\\"123", dataLine.get(2));
+		} catch (final Exception e) {
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testRfcDefaultWriter() {
+		try {
+			final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+			try (CsvWriter writer = new CsvWriter(byteArrayOutputStream, new CsvFormat().withSeparator(';'))) {
+				writer.writeValues("C:\\dir\\", "a\"b", "Line1\nLine2");
+			}
+			// Backslashes unchanged, stringquotes doubled, linebreaks written as real linebreaks within quotes
+			Assertions.assertEquals("C:\\dir\\;\"a\"\"b\";\"Line1\nLine2\"\n", new String(byteArrayOutputStream.toByteArray(), StandardCharsets.UTF_8));
+		} catch (final Exception e) {
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testBackslashEscapeCharacterTrailingBackslash() {
+		// A value ending with the escape character must not escape the closing stringquote
+		final CsvFormat csvFormat = new CsvFormat().withSeparator(';').withStringQuote('"').withStringQuoteEscapeCharacter('\\').withQuoteMode(CsvFormat.QuoteMode.QUOTE_ALL_DATA);
+		try {
+			final String csvLine = CsvWriter.getCsvLine(csvFormat, "C:\\dir\\", "a\"b", "\\\\server\\share\\");
+			Assertions.assertEquals("\"C:\\\\dir\\\\\";\"a\\\"b\";\"\\\\\\\\server\\\\share\\\\\"", csvLine);
+			final List<String> dataLine = CsvReader.parseCsvLine(csvFormat, csvLine);
+			Assertions.assertEquals("C:\\dir\\", dataLine.get(0));
+			Assertions.assertEquals("a\"b", dataLine.get(1));
+			Assertions.assertEquals("\\\\server\\share\\", dataLine.get(2));
+		} catch (final Exception e) {
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testGetCsvLineRoundTrip() {
+		final Object[] values = new Object[] { "C:\\dir\\", "a\"b", "x;y", "Line1\nLine2", "", "plain" };
+		final CsvFormat[] csvFormats = new CsvFormat[] {
+				new CsvFormat().withSeparator(';'),
+				new CsvFormat().withSeparator(';').withEscapeLineBreaks(true),
+				new CsvFormat().withSeparator(';').withStringQuoteEscapeCharacter('\\'),
+				new CsvFormat().withSeparator(';').withStringQuoteEscapeCharacter('\\').withEscapeLineBreaks(true),
+				new CsvFormat().withSeparator(',').withStringQuote('\'').withLineBreak("\r\n")
+		};
+		try {
+			for (final CsvFormat csvFormat : csvFormats) {
+				final List<String> dataLine = CsvReader.parseCsvLine(csvFormat, CsvWriter.getCsvLine(csvFormat, values));
+				Assertions.assertEquals(List.of(values), dataLine);
+			}
+		} catch (final Exception e) {
+			e.printStackTrace();
+			Assertions.fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void testGetCsvLineNoQuoteError() {
+		try {
+			CsvWriter.getCsvLine(new CsvFormat().withSeparator(';').withQuoteMode(CsvFormat.QuoteMode.NO_QUOTE), "a;b");
+			Assertions.fail("Missing expected exception");
+		} catch (@SuppressWarnings("unused") final CsvDataException e) {
+			// Exception expected
 		}
 	}
 }
