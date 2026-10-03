@@ -17,17 +17,10 @@
 	<property name="buildPath" value="build" />
 	<echo message="buildPath: ${buildPath}" />
 
-	<!-- Maven coordinates -->
-	<property name="groupPath" value="de/soderer" />
+	<!-- Artifact name used for the jar file names -->
 	<property name="artifactId" value="csv" />
 
-	<!-- gpg executable; override with -Dgpg.executable=... if it is not on the PATH -->
-	<property name="gpg.executable" value="gpg" />
-
 	<target name="build_jar" depends="cleanup_before, create_jar, test, create_javadoc, cleanup_after" />
-
-	<!-- Full Maven Central release: build, test, javadoc, pom, sign, bundle -->
-	<target name="release" depends="build_jar, create_javadoc, create_pom, sign, create_bundle" />
 
 	<target name="cleanup_before">
 		<mkdir dir="${buildPath}" />
@@ -171,45 +164,5 @@
 		<checksum file="${buildPath}/${artifactId}-${version}-javadoc.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 
 		<delete dir="${buildPath}/javadoc" />
-	</target>
-
-	<!-- POM generated from pom.template.xml with the current version filled in -->
-	<target name="create_pom">
-		<copy file="pom.template.xml" tofile="${buildPath}/${artifactId}-${version}.pom" overwrite="true" encoding="UTF-8" outputencoding="UTF-8">
-			<filterset>
-				<filter token="VERSION" value="${version}" />
-			</filterset>
-		</copy>
-		<checksum file="${buildPath}/${artifactId}-${version}.pom" fileext=".md5" forceOverwrite="yes"/>
-		<checksum file="${buildPath}/${artifactId}-${version}.pom" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
-	</target>
-
-	<!-- Detached ASCII-armored signatures (.asc) for all jars and the pom; must run after all files are final -->
-	<target name="sign">
-		<apply executable="${gpg.executable}" parallel="false" failonerror="true">
-			<arg value="--batch" />
-			<arg value="--yes" />
-			<arg value="--armor" />
-			<arg value="--detach-sign" />
-			<srcfile />
-			<fileset dir="${buildPath}">
-				<include name="${artifactId}-${version}.jar" />
-				<include name="${artifactId}-${version}-sources.jar" />
-				<include name="${artifactId}-${version}-javadoc.jar" />
-				<include name="${artifactId}-${version}.pom" />
-			</fileset>
-		</apply>
-	</target>
-
-	<!-- Zip with Maven directory layout for upload to the Central Portal -->
-	<target name="create_bundle">
-		<zip destfile="${buildPath}/${artifactId}-${version}-bundle.zip">
-			<zipfileset dir="${buildPath}" prefix="${groupPath}/${artifactId}/${version}">
-				<include name="${artifactId}-${version}.jar*" />
-				<include name="${artifactId}-${version}-sources.jar*" />
-				<include name="${artifactId}-${version}-javadoc.jar*" />
-				<include name="${artifactId}-${version}.pom*" />
-			</zipfileset>
-		</zip>
 	</target>
 </project>
