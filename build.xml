@@ -24,7 +24,7 @@
 	<!-- gpg executable; override with -Dgpg.executable=... if it is not on the PATH -->
 	<property name="gpg.executable" value="gpg" />
 
-	<target name="build_jar" depends="cleanup_before, create_jar, test, cleanup_after" />
+	<target name="build_jar" depends="cleanup_before, create_jar, test, create_javadoc, cleanup_after" />
 
 	<!-- Full Maven Central release: build, test, javadoc, pom, sign, bundle -->
 	<target name="release" depends="build_jar, create_javadoc, create_pom, sign, create_bundle" />
@@ -153,7 +153,7 @@
 		<mkdir dir="${buildPath}/javadoc" />
 
 		<!-- doclint disabled so missing javadoc comments do not break the build -->
-		<javadoc destdir="${buildPath}/javadoc" encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" source="17" failonerror="true" additionalparam="-Xdoclint:none">
+		<javadoc destdir="${buildPath}/javadoc" encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" source="17" quiet="true" failonerror="true" additionalparam="-Xdoclint:none">
 			<fileset dir="src/main/java" includes="**/*.java" />
 		</javadoc>
 
