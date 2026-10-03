@@ -1,8 +1,32 @@
 # Java CSV-Reader and CSV-Writer
 
+[![Maven Central](https://img.shields.io/maven-central/v/de.soderer/csv)](https://central.sonatype.com/artifact/de.soderer/csv)
+
 CsvReader can read .csv files and streams in any characterset encoding (also with BOM) and with configurable separator and optional stringquote (delimiter).
 
 CsvWriter can write .csv files and streams and supports the same features as CsvReader.
+
+## Usage
+
+The library is available on Maven Central. Replace `VERSION` with the version shown in the badge above.
+
+Maven:
+
+```xml
+<dependency>
+	<groupId>de.soderer</groupId>
+	<artifactId>csv</artifactId>
+	<version>VERSION</version>
+</dependency>
+```
+
+Gradle:
+
+```groovy
+implementation "de.soderer:csv:VERSION"
+```
+
+Without a build tool, the jar can be downloaded from the [GitHub releases](https://github.com/hudeany/csv/releases).
 
 ## General features:
 
