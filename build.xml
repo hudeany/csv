@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="build_jar" name="Create all Jars for Project CsvReader">
+<project default="build_jar" name="Build library csv">
+	<!-- ===== Project specific part ===== -->
+
+	<!-- Artifact name used for the jar file names and the Maven artifactId -->
 	<property name="artifactId" value="csv" />
-	
+
+	<!-- Runtime libraries of this project go to "lib/" (may stay empty) -->
+	<target name="download_dependencies">
+		<mkdir dir="lib/" />
+		<delete includeEmptyDirs="true">
+			<fileset dir="lib/">
+				<include name="*" />
+			</fileset>
+		</delete>
+	</target>
+
+	<!-- ===== Common part: identical in all library build files, do not change per project ===== -->
+
 	<echo message="Java Version: ${java.version}" />
 	<echo message="Ant Version: ${ant.version}" />
 
@@ -13,11 +28,38 @@
 	</loadfile>
 	<property name="version" value="noVersion" />
 
-	<property name="projectsPath" value="${user.home}/git" />
-	<echo message="projectsPath: ${projectsPath}" />
+	<echo message="artifactId: ${artifactId}" />
+	<echo message="version (build.version): ${version}" />
 
 	<property name="buildPath" value="build" />
 	<echo message="buildPath: ${buildPath}" />
+
+	<!-- Runtime libraries; an empty or missing "lib/" directory is fine -->
+	<path id="runtime.libs">
+		<fileset dir="lib" erroronmissingdir="false">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<!-- Test libraries, same for all libraries -->
+	<target name="download_test_dependencies">
+		<mkdir dir="lib_test/" />
+		<delete includeEmptyDirs="true">
+			<fileset dir="lib_test/">
+				<include name="*" />
+			</fileset>
+		</delete>
+
+		<get src="https://repo1.maven.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar" dest="lib_test/" />
+		<get src="https://repo1.maven.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar" dest="lib_test/" />
+	</target>
 
 	<target name="build_jar" depends="cleanup_before, create_jar, test, create_javadoc, cleanup_after" />
 
@@ -37,27 +79,9 @@
 		<mkdir dir="${buildPath}/testbin" />
 	</target>
 
-	<target name="download_dependencies">
-		<mkdir dir="lib_test/" />
-		<delete includeEmptyDirs="true">
-			<fileset dir="lib_test/">
-				<include name="*" />
-			</fileset>
-		</delete>
-
-		<get src="https://repo1.maven.org/maven2/org/hamcrest/hamcrest/3.0/hamcrest-3.0.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-launcher/6.0.3/junit-platform-launcher-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar" dest="lib_test/" />
-		<get src="https://repo1.maven.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar" dest="lib_test/" />
-	</target>
-
 	<target name="create_jar" depends="cleanup_before, download_dependencies">
 		<javac release="17" srcdir="src/main/java" destdir="${buildPath}/bin" includeantruntime="false" encoding="UTF-8" debug="true" deprecation="false" nowarn="true">
+			<classpath refid="runtime.libs" />
 			<compilerarg value="-Xlint:unchecked" />
 			<compilerarg value="-parameters" />
 		</javac>
@@ -74,7 +98,7 @@
 			<fileset dir="${buildPath}/bin" />
 			<fileset dir="" includes="LICENSE.txt" />
 		</jar>
-		<checksum file="${buildPath}/${artifactId}-${version}.jar" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}.jar" fileext=".md5" forceOverwrite="yes" />
 		<checksum file="${buildPath}/${artifactId}-${version}.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 
 		<jar destfile="${buildPath}/${artifactId}-${version}-sources.jar">
@@ -82,33 +106,24 @@
 				<attribute name="Version" value="${version}" />
 			</manifest>
 
-			<fileset dir="src/main/java" includes="**/*.java"/>
-			<fileset dir="" includes="LICENSE.txt"/>
+			<fileset dir="src/main/java" includes="**/*.java" />
+			<fileset dir="" includes="LICENSE.txt" />
 		</jar>
-		<checksum file="${buildPath}/${artifactId}-${version}-sources.jar" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}-sources.jar" fileext=".md5" forceOverwrite="yes" />
 		<checksum file="${buildPath}/${artifactId}-${version}-sources.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 	</target>
 
-	<target name="test" depends="create_jar">
-		<path id="test.libs">
+	<target name="test" depends="create_jar, download_test_dependencies">
+		<path id="test.classpath">
 			<fileset dir="lib_test">
 				<include name="*.jar" />
 			</fileset>
+			<path refid="runtime.libs" />
+			<pathelement location="${buildPath}/${artifactId}-${version}.jar" />
+			<pathelement location="${buildPath}/testbin" />
 		</path>
 
-		<path id="runtime.classpath">
-			<fileset dir="${buildPath}">
-				<include name="*.jar" />
-			</fileset>
-		</path>
-
-		<path id="test.classpath">
-			<path refid="test.libs" />
-			<path refid="runtime.classpath" />
-			<pathelement path="${buildPath}/testbin" />
-		</path>
-
-		<javac release="17" destdir="${buildPath}/testbin" srcdir="src/test/java" includeantruntime="false" failonerror="true">
+		<javac release="17" srcdir="src/test/java" destdir="${buildPath}/testbin" includeantruntime="false" encoding="UTF-8" debug="true" failonerror="true">
 			<classpath refid="test.classpath" />
 			<include name="**/*.java" />
 		</javac>
@@ -128,23 +143,13 @@
 		<fail if="test.failed" message="Tests failed!" />
 	</target>
 
-	<target name="cleanup_after" depends="test">
-		<delete dir="${buildPath}/bin" />
-		<delete dir="${buildPath}/testbin" />
-
-		<delete includeEmptyDirs="true">
-			<fileset dir="${buildPath}">
-				<include name="TEST-*" />
-			</fileset>
-		</delete>
-	</target>
-
-	<target name="create_javadoc">
+	<target name="create_javadoc" depends="create_jar">
 		<delete dir="${buildPath}/javadoc" />
 		<mkdir dir="${buildPath}/javadoc" />
 
 		<!-- doclint disabled so missing javadoc comments do not break the build -->
 		<javadoc destdir="${buildPath}/javadoc" encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" source="17" failonerror="true">
+			<classpath refid="runtime.libs" />
 			<arg value="-quiet" />
 			<arg value="-Xdoclint:none" />
 			<fileset dir="src/main/java" includes="**/*.java" />
@@ -158,9 +163,20 @@
 			<fileset dir="${buildPath}/javadoc" />
 			<fileset dir="" includes="LICENSE.txt" />
 		</jar>
-		<checksum file="${buildPath}/${artifactId}-${version}-javadoc.jar" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}-javadoc.jar" fileext=".md5" forceOverwrite="yes" />
 		<checksum file="${buildPath}/${artifactId}-${version}-javadoc.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 
 		<delete dir="${buildPath}/javadoc" />
+	</target>
+
+	<target name="cleanup_after" depends="test, create_javadoc">
+		<delete dir="${buildPath}/bin" />
+		<delete dir="${buildPath}/testbin" />
+
+		<delete includeEmptyDirs="true">
+			<fileset dir="${buildPath}">
+				<include name="TEST-*" />
+			</fileset>
+		</delete>
 	</target>
 </project>
