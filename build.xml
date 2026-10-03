@@ -3,7 +3,12 @@
 	<echo message="Java Version: ${java.version}" />
 	<echo message="Ant Version: ${ant.version}" />
 
-	<loadfile property="version" srcFile="build.version" failonerror="false" />
+	<!-- Strip line breaks so a trailing newline in build.version does not end up in file names -->
+	<loadfile property="version" srcFile="build.version" failonerror="false">
+		<filterchain>
+			<striplinebreaks />
+		</filterchain>
+	</loadfile>
 	<property name="version" value="noVersion" />
 
 	<property name="projectsPath" value="${user.home}/git" />
@@ -12,7 +17,17 @@
 	<property name="buildPath" value="build" />
 	<echo message="buildPath: ${buildPath}" />
 
+	<!-- Maven coordinates -->
+	<property name="groupPath" value="de/soderer" />
+	<property name="artifactId" value="csv" />
+
+	<!-- gpg executable; override with -Dgpg.executable=... if it is not on the PATH -->
+	<property name="gpg.executable" value="gpg" />
+
 	<target name="build_jar" depends="cleanup_before, create_jar, test, cleanup_after" />
+
+	<!-- Full Maven Central release: build, test, javadoc, pom, sign, bundle -->
+	<target name="release" depends="build_jar, create_javadoc, create_pom, sign, create_bundle" />
 
 	<target name="cleanup_before">
 		<mkdir dir="${buildPath}" />
@@ -59,7 +74,7 @@
 			<fileset dir="src/main/resources" erroronmissingdir="false" />
 		</copy>
 
-		<jar destfile="${buildPath}/csv-${version}.jar">
+		<jar destfile="${buildPath}/${artifactId}-${version}.jar">
 			<manifest>
 				<attribute name="Version" value="${version}" />
 			</manifest>
@@ -67,10 +82,10 @@
 			<fileset dir="${buildPath}/bin" />
 			<fileset dir="" includes="LICENSE.txt" />
 		</jar>
-		<checksum file="${buildPath}/csv-${version}.jar" fileext=".md5" forceOverwrite="yes"/>
-		<checksum file="${buildPath}/csv-${version}.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
+		<checksum file="${buildPath}/${artifactId}-${version}.jar" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 
-		<jar destfile="${buildPath}/csv-${version}-sources.jar">
+		<jar destfile="${buildPath}/${artifactId}-${version}-sources.jar">
 			<manifest>
 				<attribute name="Version" value="${version}" />
 			</manifest>
@@ -78,8 +93,8 @@
 			<fileset dir="src/main/java" includes="**/*.java"/>
 			<fileset dir="" includes="LICENSE.txt"/>
 		</jar>
-		<checksum file="${buildPath}/csv-${version}-sources.jar" fileext=".md5" forceOverwrite="yes"/>
-		<checksum file="${buildPath}/csv-${version}-sources.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
+		<checksum file="${buildPath}/${artifactId}-${version}-sources.jar" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}-sources.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
 	</target>
 
 	<target name="test" depends="create_jar">
@@ -110,10 +125,6 @@
 			<fileset dir="src/test/resources" erroronmissingdir="false" />
 		</copy>
 
-		<fileset id="testbin.classes" dir="${buildPath}/testbin">
-			<include name="**/*.class" />
-		</fileset>
-
 		<junitlauncher printSummary="true" failureProperty="test.failed">
 			<classpath refid="test.classpath" />
 			<testclasses outputdir="${buildPath}">
@@ -134,5 +145,69 @@
 				<include name="TEST-*" />
 			</fileset>
 		</delete>
+	</target>
+
+	<!-- Javadoc jar, required by Maven Central -->
+	<target name="create_javadoc">
+		<delete dir="${buildPath}/javadoc" />
+		<mkdir dir="${buildPath}/javadoc" />
+
+		<!-- doclint disabled so missing javadoc comments do not break the build -->
+		<javadoc destdir="${buildPath}/javadoc" encoding="UTF-8" charset="UTF-8" docencoding="UTF-8" source="17" failonerror="true" additionalparam="-Xdoclint:none">
+			<fileset dir="src/main/java" includes="**/*.java" />
+		</javadoc>
+
+		<jar destfile="${buildPath}/${artifactId}-${version}-javadoc.jar">
+			<manifest>
+				<attribute name="Version" value="${version}" />
+			</manifest>
+
+			<fileset dir="${buildPath}/javadoc" />
+			<fileset dir="" includes="LICENSE.txt" />
+		</jar>
+		<checksum file="${buildPath}/${artifactId}-${version}-javadoc.jar" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}-javadoc.jar" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
+
+		<delete dir="${buildPath}/javadoc" />
+	</target>
+
+	<!-- POM generated from pom.template.xml with the current version filled in -->
+	<target name="create_pom">
+		<copy file="pom.template.xml" tofile="${buildPath}/${artifactId}-${version}.pom" overwrite="true" encoding="UTF-8" outputencoding="UTF-8">
+			<filterset>
+				<filter token="VERSION" value="${version}" />
+			</filterset>
+		</copy>
+		<checksum file="${buildPath}/${artifactId}-${version}.pom" fileext=".md5" forceOverwrite="yes"/>
+		<checksum file="${buildPath}/${artifactId}-${version}.pom" algorithm="SHA-1" fileext=".sha1" forceOverwrite="yes" />
+	</target>
+
+	<!-- Detached ASCII-armored signatures (.asc) for all jars and the pom; must run after all files are final -->
+	<target name="sign">
+		<apply executable="${gpg.executable}" parallel="false" failonerror="true">
+			<arg value="--batch" />
+			<arg value="--yes" />
+			<arg value="--armor" />
+			<arg value="--detach-sign" />
+			<srcfile />
+			<fileset dir="${buildPath}">
+				<include name="${artifactId}-${version}.jar" />
+				<include name="${artifactId}-${version}-sources.jar" />
+				<include name="${artifactId}-${version}-javadoc.jar" />
+				<include name="${artifactId}-${version}.pom" />
+			</fileset>
+		</apply>
+	</target>
+
+	<!-- Zip with Maven directory layout for upload to the Central Portal -->
+	<target name="create_bundle">
+		<zip destfile="${buildPath}/${artifactId}-${version}-bundle.zip">
+			<zipfileset dir="${buildPath}" prefix="${groupPath}/${artifactId}/${version}">
+				<include name="${artifactId}-${version}.jar*" />
+				<include name="${artifactId}-${version}-sources.jar*" />
+				<include name="${artifactId}-${version}-javadoc.jar*" />
+				<include name="${artifactId}-${version}.pom*" />
+			</zipfileset>
+		</zip>
 	</target>
 </project>
