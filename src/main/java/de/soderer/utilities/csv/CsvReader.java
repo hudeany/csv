@@ -57,8 +57,8 @@ public class CsvReader extends BasicReader {
 	 *
 	 * @param inputStream
 	 *            the input stream
-	 * @param separator
-	 *            the separator
+	 * @param csvFormat
+	 *            the csv format
 	 */
 	public CsvReader(final InputStream inputStream, final CsvFormat csvFormat) throws Exception {
 		this(inputStream, DEFAULT_ENCODING, csvFormat);
@@ -71,8 +71,8 @@ public class CsvReader extends BasicReader {
 	 *            the input stream
 	 * @param encoding
 	 *            the encoding
-	 * @param separator
-	 *            the separator
+	 * @param csvFormat
+	 *            the csv format
 	 */
 	public CsvReader(final InputStream inputStream, final Charset encoding, final CsvFormat csvFormat) throws Exception {
 		this(inputStream, encoding);
@@ -110,7 +110,8 @@ public class CsvReader extends BasicReader {
 	/**
 	 * Configured csv format
 	 *
-	 * @param csvFormat
+	 * @param newCsvFormat
+	 * @return this reader for chaining
 	 * @throws Exception
 	 */
 	public CsvReader withCsvFormat(final CsvFormat newCsvFormat) throws Exception {

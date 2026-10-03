@@ -84,8 +84,8 @@ public class CsvWriter implements Closeable {
 	 *
 	 * @param outputStream
 	 *            the output stream
-	 * @param separator
-	 *            the separator
+	 * @param csvFormat
+	 *            the csv format
 	 */
 	public CsvWriter(final OutputStream outputStream, final CsvFormat csvFormat) {
 		this(outputStream, DEFAULT_ENCODING, csvFormat);
@@ -98,12 +98,8 @@ public class CsvWriter implements Closeable {
 	 *            the output stream
 	 * @param encoding
 	 *            the encoding
-	 * @param separator
-	 *            the separator
-	 * @param stringQuote
-	 *            the string quote
-	 * @param lineBreak
-	 *            the line break
+	 * @param csvFormat
+	 *            the csv format
 	 */
 	public CsvWriter(final OutputStream outputStream, final Charset encoding, final CsvFormat csvFormat) {
 		this.csvFormat = csvFormat;
@@ -480,7 +476,8 @@ public class CsvWriter implements Closeable {
 	/**
 	 * Set minimumColumnSizes for beautification
 	 *
-	 * @param minimumColumnSizes
+	 * @param newMinimumColumnSizes
+	 * @return this writer for chaining
 	 */
 	public CsvWriter withMinimumColumnSizes(final int[] newMinimumColumnSizes) {
 		setMinimumColumnSizes(newMinimumColumnSizes);
@@ -499,7 +496,8 @@ public class CsvWriter implements Closeable {
 	/**
 	 * Set columnPaddings for beautification (true = right padding = left aligned)
 	 *
-	 * @param columnPaddings
+	 * @param newColumnPaddings
+	 * @return this writer for chaining
 	 */
 	public CsvWriter withColumnPaddings(final boolean[] newColumnPaddings) {
 		setColumnPaddings(newColumnPaddings);
@@ -509,8 +507,8 @@ public class CsvWriter implements Closeable {
 	/**
 	 * Append blanks at the left of a string to make if fit the given minimum
 	 *
-	 * @param escapedValue
-	 * @param i
+	 * @param value
+	 * @param minimumLength
 	 * @return
 	 */
 	private static String leftPad(final String value, final int minimumLength) {
@@ -524,8 +522,8 @@ public class CsvWriter implements Closeable {
 	/**
 	 * Append blanks at the right of a string to make if fit the given minimum
 	 *
-	 * @param escapedValue
-	 * @param i
+	 * @param value
+	 * @param minimumLength
 	 * @return
 	 */
 	private static String rightPad(final String value, final int minimumLength) {
