@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="build_jar" name="Create all Jars for Project CsvReader">
+	<property name="artifactId" value="csv" />
+	
 	<echo message="Java Version: ${java.version}" />
 	<echo message="Ant Version: ${ant.version}" />
 
@@ -16,9 +18,6 @@
 
 	<property name="buildPath" value="build" />
 	<echo message="buildPath: ${buildPath}" />
-
-	<!-- Artifact name used for the jar file names -->
-	<property name="artifactId" value="csv" />
 
 	<target name="build_jar" depends="cleanup_before, create_jar, test, create_javadoc, cleanup_after" />
 
@@ -140,7 +139,6 @@
 		</delete>
 	</target>
 
-	<!-- Javadoc jar, required by Maven Central -->
 	<target name="create_javadoc">
 		<delete dir="${buildPath}/javadoc" />
 		<mkdir dir="${buildPath}/javadoc" />
