@@ -15,7 +15,13 @@ import de.soderer.utilities.csv.CsvFormat.QuoteMode;
 import de.soderer.utilities.csv.utilities.Utilities;
 
 /**
- * The Class CsvWriter.
+ * Writer for CSV data to an output stream.
+ * <p>
+ * The data format (separator, string quote, escaping, quote mode, line break) is defined by a
+ * {@link CsvFormat}. The format is evaluated when the writer is created, later changes of the
+ * format object are not supported. The number of values of the first line defines the expected
+ * number of values of all following lines.
+ * </p>
  */
 public class CsvWriter implements Closeable {
 	/** CSV data format definition */
@@ -58,50 +64,61 @@ public class CsvWriter implements Closeable {
 	private final boolean escapeLineBreaks;
 
 	/**
-	 * CSV Writer derived constructor.
+	 * Creates a new CSV writer using UTF-8 encoding and the default {@link CsvFormat}.
 	 *
 	 * @param outputStream
-	 *            the output stream
+	 *            the output stream to write to
+	 * @throws IllegalArgumentException
+	 *             if the output stream is null
 	 */
 	public CsvWriter(final OutputStream outputStream) {
 		this(outputStream, DEFAULT_ENCODING);
 	}
 
 	/**
-	 * CSV Writer derived constructor.
+	 * Creates a new CSV writer using the given encoding and the default {@link CsvFormat}.
 	 *
 	 * @param outputStream
-	 *            the output stream
+	 *            the output stream to write to
 	 * @param encoding
-	 *            the encoding
+	 *            the encoding of the output data
+	 * @throws IllegalArgumentException
+	 *             if the output stream or the encoding is null
 	 */
 	public CsvWriter(final OutputStream outputStream, final Charset encoding) {
 		this(outputStream, encoding, new CsvFormat());
 	}
 
 	/**
-	 * CSV Writer derived constructor.
+	 * Creates a new CSV writer using UTF-8 encoding and the given CSV format.
 	 *
 	 * @param outputStream
-	 *            the output stream
+	 *            the output stream to write to
 	 * @param csvFormat
-	 *            the csv format
+	 *            the CSV format of the output data
+	 * @throws IllegalArgumentException
+	 *             if the output stream or the CSV format is null
 	 */
 	public CsvWriter(final OutputStream outputStream, final CsvFormat csvFormat) {
 		this(outputStream, DEFAULT_ENCODING, csvFormat);
 	}
 
 	/**
-	 * CSV Writer main constructor.
+	 * Creates a new CSV writer using the given encoding and CSV format.
 	 *
 	 * @param outputStream
-	 *            the output stream
+	 *            the output stream to write to
 	 * @param encoding
-	 *            the encoding
+	 *            the encoding of the output data
 	 * @param csvFormat
-	 *            the csv format
+	 *            the CSV format of the output data
+	 * @throws IllegalArgumentException
+	 *             if the output stream, the encoding or the CSV format is null
 	 */
 	public CsvWriter(final OutputStream outputStream, final Charset encoding, final CsvFormat csvFormat) {
+		if (csvFormat == null) {
+			throw new IllegalArgumentException("CsvFormat is null");
+		}
 		this.csvFormat = csvFormat;
 		this.outputStream = outputStream;
 		this.encoding = encoding;
@@ -118,21 +135,27 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Get configured csv format
+	 * Returns the configured CSV format.
 	 *
-	 * @return
+	 * @return the CSV format
 	 */
 	public CsvFormat getCsvFormat() {
 		return csvFormat;
 	}
 
 	/**
-	 * Write a single line of data entries.
+	 * Writes a single CSV line. Null values are written as empty values.
 	 *
 	 * @param values
-	 *            the values
-	 * @throws Exception
-	 *             the exception
+	 *            the values of the line
+	 * @return this writer for chaining
+	 * @throws CsvDataException
+	 *             if the number of values differs from the first line, or a value needs quoting
+	 *             while quoting is deactivated
+	 * @throws IOException
+	 *             if writing fails
+	 * @throws IllegalStateException
+	 *             if this writer is already closed
 	 */
 	public CsvWriter writeValues(final Object... values) throws CsvDataException, IOException {
 		writeValues(Arrays.asList(values));
@@ -140,14 +163,18 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Write a single line of data entries.
+	 * Writes a single CSV line. Null values are written as empty values.
 	 *
 	 * @param values
-	 *            the values
+	 *            the values of the line
+	 * @return this writer for chaining
 	 * @throws CsvDataException
-	 *             the csv data exception
+	 *             if the values are null, their number differs from the first line, or a value
+	 *             needs quoting while quoting is deactivated
 	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 *             if writing fails
+	 * @throws IllegalStateException
+	 *             if this writer is already closed
 	 */
 	public CsvWriter writeValues(final List<? extends Object> values) throws CsvDataException, IOException {
 		if (values == null) {
@@ -188,14 +215,17 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Write a full set of lines of data entries.
+	 * Writes several CSV lines.
 	 *
 	 * @param valueLines
-	 *            the value lines
-	 * @throws Exception
-	 *             the exception
+	 *            the values of each line
+	 * @return this writer for chaining
+	 * @throws CsvDataException
+	 *             if the values of a line are invalid, see {@link #writeValues(List)}
+	 * @throws IOException
+	 *             if writing fails
 	 */
-	public CsvWriter writeAll(final List<List<? extends Object>> valueLines) throws Exception {
+	public CsvWriter writeAll(final List<List<? extends Object>> valueLines) throws CsvDataException, IOException {
 		for (final List<? extends Object> valuesOfLine : valueLines) {
 			writeValues(valuesOfLine);
 		}
@@ -221,8 +251,9 @@ public class CsvWriter implements Closeable {
 			valueString = Utilities.escapeCSV(Utilities.normalizeLinebreaks(valueString));
 		}
 
+		// A stringquote character in data needs quotation only if quoting is active, otherwise it is a plain character
 		final boolean valueNeedsQuotation =
-				valueString.contains(stringQuoteString)
+				(csvFormat.getQuoteMode() != QuoteMode.NO_QUOTE && valueString.contains(stringQuoteString))
 				|| valueString.contains(separatorString)
 				|| valueString.contains("\r")
 				|| valueString.contains("\n");
@@ -263,12 +294,14 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Calculate column value output sizes for beautification of csv output.
+	 * Calculates the output sizes of values including quoting and escaping, e.g. to determine
+	 * minimum column sizes for beautified output.
 	 *
 	 * @param values
 	 *            the values
+	 * @return the output size of each value
 	 * @throws CsvDataException
-	 *             the csv data exception
+	 *             if a value needs quoting while quoting is deactivated
 	 */
 	public int[] calculateOutputSizesOfValues(final List<? extends Object> values) throws CsvDataException {
 		final int[] returnArray = new int[values.size()];
@@ -279,12 +312,13 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Calculate column value output size for beautification of csv output.
+	 * Calculates the output size of a value including quoting and escaping.
 	 *
 	 * @param value
 	 *            the value
+	 * @return the output size of the value
 	 * @throws CsvDataException
-	 *             the csv data exception
+	 *             if the value needs quoting while quoting is deactivated
 	 */
 	public int calculateOutputSizesOfValue(final Object value) throws CsvDataException {
 		return escapeValue(value).length();
@@ -302,19 +336,20 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Get number of lines written until now.
+	 * Returns the number of CSV lines written so far.
 	 *
-	 * @return the written lines
+	 * @return the number of written lines
 	 */
 	public int getWrittenLines() {
 		return writtenLines;
 	}
 
 	/**
-	 * Flush buffered data.
+	 * Flushes buffered data to the output stream.
 	 *
+	 * @return this writer for chaining
 	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 *             if writing fails
 	 */
 	public CsvWriter flush() throws IOException {
 		if (outputWriter != null) {
@@ -324,30 +359,40 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Create a single csv line.
+	 * Creates a single CSV line without trailing line break. Values are quoted only if needed and
+	 * string quotes are doubled. Null values are written as empty values.
 	 *
 	 * @param separator
-	 *            the separator
+	 *            the separator character
 	 * @param stringQuote
-	 *            the string quote
+	 *            the string quote character, or null to deactivate quoting
+	 * @param escapeLineBreaks
+	 *            true to use backslash escape sequences, see {@link CsvFormat#isEscapeLineBreaks()}
 	 * @param values
 	 *            the values
-	 * @return the csv line
+	 * @return the CSV line
+	 * @throws IllegalArgumentException
+	 *             if a value needs quoting while quoting is deactivated
 	 */
 	public static String getCsvLine(final char separator, final Character stringQuote, final boolean escapeLineBreaks, final List<? extends Object> values) {
 		return getCsvLine(separator, stringQuote, escapeLineBreaks, values.toArray());
 	}
 
 	/**
-	 * Create a single csv line.
+	 * Creates a single CSV line without trailing line break. Values are quoted only if needed and
+	 * string quotes are doubled. Null values are written as empty values.
 	 *
 	 * @param separator
-	 *            the separator
+	 *            the separator character
 	 * @param stringQuote
-	 *            the string quote
+	 *            the string quote character, or null to deactivate quoting
+	 * @param escapeLineBreaks
+	 *            true to use backslash escape sequences, see {@link CsvFormat#isEscapeLineBreaks()}
 	 * @param values
 	 *            the values
-	 * @return the csv line
+	 * @return the CSV line
+	 * @throws IllegalArgumentException
+	 *             if a value needs quoting while quoting is deactivated
 	 */
 	public static String getCsvLine(final char separator, final Character stringQuote, final boolean escapeLineBreaks, final Object... values) {
 		final StringBuilder returnValue = new StringBuilder();
@@ -355,8 +400,10 @@ public class CsvWriter implements Closeable {
 		final String stringQuoteString = stringQuote == null ? "" : Character.toString(stringQuote);
 		final String doubleStringQuoteString = stringQuoteString + stringQuoteString;
 		if (values != null) {
-			for (final Object value : values) {
-				if (returnValue.length() > 0) {
+			for (int i = 0; i < values.length; i++) {
+				final Object value = values[i];
+				// Use the index, because a leading empty value leaves the line empty
+				if (i > 0) {
 					returnValue.append(separator);
 				}
 				if (value != null) {
@@ -390,7 +437,7 @@ public class CsvWriter implements Closeable {
 
 	/**
 	 * Create a single csv line using the given csv format.
-	 * Counterpart of CsvReader.parseCsvLine(CsvFormat, String).
+	 * Counterpart of {@link CsvReader#parseCsvLine(CsvFormat, String)}.
 	 * The line is created by the same escaping and quoting logic as writeValues(),
 	 * so separator, stringquote, stringquote escape character, quote mode and
 	 * escapeLineBreaks of the csv format are respected.
@@ -431,7 +478,7 @@ public class CsvWriter implements Closeable {
 
 	/**
 	 * Create a single csv line using the given csv format.
-	 * See getCsvLine(CsvFormat, List).
+	 * See {@link #getCsvLine(CsvFormat, List)}.
 	 *
 	 * @param csvFormat
 	 *            the csv format
@@ -465,18 +512,22 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Set minimumColumnSizes for beautification
+	 * Sets minimum output sizes of columns for beautified output. Shorter values are padded with
+	 * blanks, see {@link #setColumnPaddings(boolean[])}.
 	 *
 	 * @param minimumColumnSizes
+	 *            the minimum size of each column, or null for no padding
 	 */
 	public void setMinimumColumnSizes(final int[] minimumColumnSizes) {
 		this.minimumColumnSizes = minimumColumnSizes;
 	}
 
 	/**
-	 * Set minimumColumnSizes for beautification
+	 * Sets minimum output sizes of columns for beautified output, see
+	 * {@link #setMinimumColumnSizes(int[])}.
 	 *
 	 * @param newMinimumColumnSizes
+	 *            the minimum size of each column, or null for no padding
 	 * @return this writer for chaining
 	 */
 	public CsvWriter withMinimumColumnSizes(final int[] newMinimumColumnSizes) {
@@ -485,18 +536,22 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Set columnPaddings for beautification (true = right padding = left aligned)
+	 * Sets the padding side of columns for beautified output.
 	 *
 	 * @param columnPaddings
+	 *            for each column true for right padding (left aligned) or false for left padding
+	 *            (right aligned, the default), or null for left padding of all columns
 	 */
 	public void setColumnPaddings(final boolean[] columnPaddings) {
 		this.columnPaddings = columnPaddings;
 	}
 
 	/**
-	 * Set columnPaddings for beautification (true = right padding = left aligned)
+	 * Sets the padding side of columns for beautified output, see
+	 * {@link #setColumnPaddings(boolean[])}.
 	 *
 	 * @param newColumnPaddings
+	 *            for each column true for right padding (left aligned) or false for left padding
 	 * @return this writer for chaining
 	 */
 	public CsvWriter withColumnPaddings(final boolean[] newColumnPaddings) {
@@ -505,11 +560,13 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Append blanks at the left of a string to make if fit the given minimum
+	 * Prepends blanks to a string to make it fit the given minimum length.
 	 *
 	 * @param value
+	 *            the value
 	 * @param minimumLength
-	 * @return
+	 *            the minimum length
+	 * @return the padded value
 	 */
 	private static String leftPad(final String value, final int minimumLength) {
 		try {
@@ -520,11 +577,13 @@ public class CsvWriter implements Closeable {
 	}
 
 	/**
-	 * Append blanks at the right of a string to make if fit the given minimum
+	 * Appends blanks to a string to make it fit the given minimum length.
 	 *
 	 * @param value
+	 *            the value
 	 * @param minimumLength
-	 * @return
+	 *            the minimum length
+	 * @return the padded value
 	 */
 	private static String rightPad(final String value, final int minimumLength) {
 		try {

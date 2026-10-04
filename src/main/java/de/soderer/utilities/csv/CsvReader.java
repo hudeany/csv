@@ -15,7 +15,13 @@ import de.soderer.utilities.csv.utilities.BasicReader;
 import de.soderer.utilities.csv.utilities.Utilities;
 
 /**
- * The Class CsvReader.
+ * Reader for CSV data from an input stream.
+ * <p>
+ * The data format (separator, string quote, escaping etc.) is defined by a {@link CsvFormat}.
+ * Lines are read one by one by {@link #readNextCsvLine()} or all at once by {@link #readAll()}.
+ * The number of values of the first line defines the expected number of values of all following
+ * lines. Line breaks may be CR, LF or CRLF, a leading UTF-8 BOM is skipped.
+ * </p>
  */
 public class CsvReader extends BasicReader {
 	/** CSV data format definition */
@@ -31,48 +37,56 @@ public class CsvReader extends BasicReader {
 	private int readCsvLines = 0;
 
 	/**
-	 * CSV Reader derived constructor.
+	 * Creates a new CSV reader using UTF-8 encoding and the default {@link CsvFormat}.
 	 *
 	 * @param inputStream
-	 *            the input stream
+	 *            the input stream to read from
+	 * @throws Exception
+	 *             if the input stream is null
 	 */
 	public CsvReader(final InputStream inputStream) throws Exception {
 		this(inputStream, DEFAULT_ENCODING);
 	}
 
 	/**
-	 * CSV Reader derived constructor.
+	 * Creates a new CSV reader using the given encoding and the default {@link CsvFormat}.
 	 *
 	 * @param inputStream
-	 *            the input stream
+	 *            the input stream to read from
 	 * @param encoding
-	 *            the encoding
+	 *            the encoding of the input data, or null for UTF-8
+	 * @throws Exception
+	 *             if the input stream is null
 	 */
 	public CsvReader(final InputStream inputStream, final Charset encoding) throws Exception {
 		super(inputStream, encoding);
 	}
 
 	/**
-	 * CSV Reader derived constructor.
+	 * Creates a new CSV reader using UTF-8 encoding and the given CSV format.
 	 *
 	 * @param inputStream
-	 *            the input stream
+	 *            the input stream to read from
 	 * @param csvFormat
-	 *            the csv format
+	 *            the CSV format of the input data
+	 * @throws Exception
+	 *             if the input stream or the CSV format is null
 	 */
 	public CsvReader(final InputStream inputStream, final CsvFormat csvFormat) throws Exception {
 		this(inputStream, DEFAULT_ENCODING, csvFormat);
 	}
 
 	/**
-	 * CSV Reader derived constructor.
+	 * Creates a new CSV reader using the given encoding and CSV format.
 	 *
 	 * @param inputStream
-	 *            the input stream
+	 *            the input stream to read from
 	 * @param encoding
-	 *            the encoding
+	 *            the encoding of the input data, or null for UTF-8
 	 * @param csvFormat
-	 *            the csv format
+	 *            the CSV format of the input data
+	 * @throws Exception
+	 *             if the input stream or the CSV format is null
 	 */
 	public CsvReader(final InputStream inputStream, final Charset encoding, final CsvFormat csvFormat) throws Exception {
 		this(inputStream, encoding);
@@ -85,19 +99,21 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * Get configured csv format
+	 * Returns the configured CSV format.
 	 *
-	 * @return
+	 * @return the CSV format
 	 */
 	public CsvFormat getCsvFormat() {
 		return csvFormat;
 	}
 
 	/**
-	 * Configured csv format
+	 * Sets the CSV format. Should be set before reading starts.
 	 *
 	 * @param csvFormat
+	 *            the CSV format of the input data
 	 * @throws Exception
+	 *             if the CSV format is null
 	 */
 	public void setCsvFormat(final CsvFormat csvFormat) throws Exception {
 		if (csvFormat == null) {
@@ -108,11 +124,13 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * Configured csv format
+	 * Sets the CSV format. Should be set before reading starts.
 	 *
 	 * @param newCsvFormat
+	 *            the CSV format of the input data
 	 * @return this reader for chaining
 	 * @throws Exception
+	 *             if the CSV format is null
 	 */
 	public CsvReader withCsvFormat(final CsvFormat newCsvFormat) throws Exception {
 		setCsvFormat(newCsvFormat);
@@ -120,22 +138,24 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * Get lines read until now.
+	 * Returns the number of CSV lines read so far. A CSV line may span several physical lines, if
+	 * quoted values contain line breaks.
 	 *
-	 * @return the read lines
+	 * @return the number of CSV lines read
 	 */
 	public int getReadCsvLines() {
 		return readCsvLines;
 	}
 
 	/**
-	 * Read the next line of csv data.
+	 * Reads the next CSV line. The reader is closed automatically, when the end of data is
+	 * reached.
 	 *
-	 * @return the list
+	 * @return the values of the next line, or null if the end of data has been reached
 	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 *             if reading fails or the data ends within a quoted value
 	 * @throws CsvDataException
-	 *             the csv data exception
+	 *             if the data does not match the CSV format, e.g. an inconsistent number of values
 	 */
 	public List<String> readNextCsvLine() throws IOException, CsvDataException {
 		readCsvLines++;
@@ -236,6 +256,7 @@ public class CsvReader extends BasicReader {
 			}
 
 			if (csvFormat.isIgnoreEmptyLines() && isBlank(returnList)) {
+				close();
 				return null;
 			} else if (returnList.size() > 0) {
 				if (numberOfColumns == -1) {
@@ -268,13 +289,16 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * Read all csv data at once. This can only be done before readNextCsvLine() was called for the first time
+	 * Reads all CSV lines at once and closes the reader. This is only possible before
+	 * {@link #readNextCsvLine()} was called for the first time.
 	 *
-	 * @return the list
+	 * @return the values of all lines
 	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 *             if reading fails or the data ends within a quoted value
 	 * @throws CsvDataException
-	 *             the csv data exception
+	 *             if the data does not match the CSV format
+	 * @throws IllegalStateException
+	 *             if {@link #readNextCsvLine()} was called before
 	 */
 	public List<List<String>> readAll() throws IOException, CsvDataException {
 		if (singleReadStarted) {
@@ -294,7 +318,7 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * Parse a single value to applicate allowed double stringquotes.
+	 * Parse a single value to apply quoting and escaping rules.
 	 *
 	 * @param rawValue
 	 *            the raw value
@@ -371,6 +395,13 @@ public class CsvReader extends BasicReader {
 		}
 	}
 
+	/**
+	 * Checks if a list contains only null, empty or blank values.
+	 *
+	 * @param list
+	 *            the list to check, may be null
+	 * @return true, if the list contains no value with non whitespace characters
+	 */
 	private static boolean isBlank(final List<String> list) {
 		if (list != null) {
 			for (final String item : list) {
@@ -383,14 +414,18 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * This method reads the stream to the end and counts all csv value lines, which can be less than the absolute linebreak count of the stream for the reason of quoted linebreaks. The result also
-	 * contains the first line, which may consist of columnheaders.
+	 * Reads the data to the end, counts all CSV lines and closes the reader. The count may be less
+	 * than the number of physical lines because of line breaks in quoted values. It includes the
+	 * first line, which may contain column headers. This is only possible before
+	 * {@link #readNextCsvLine()} was called for the first time.
 	 *
-	 * @return the csv line count
+	 * @return the number of CSV lines
 	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 *             if reading fails or the data ends within a quoted value
 	 * @throws CsvDataException
-	 *             the csv data exception
+	 *             if the data does not match the CSV format
+	 * @throws IllegalStateException
+	 *             if {@link #readNextCsvLine()} was called before
 	 */
 	public int getCsvLineCount() throws IOException, CsvDataException {
 		if (singleReadStarted) {
@@ -409,23 +444,31 @@ public class CsvReader extends BasicReader {
 	}
 
 	/**
-	 * Parse a single csv data line for data entries.
+	 * Parses a single CSV line using the default {@link CsvFormat}.
 	 *
 	 * @param csvLine
-	 * @return
+	 *            the CSV line, without or with trailing line break
+	 * @return the values of the line
 	 * @throws Exception
+	 *             if the text contains no or more than one CSV line, or does not match the CSV
+	 *             format
 	 */
 	public static List<String> parseCsvLine(final String csvLine) throws Exception {
 		return parseCsvLine(new CsvFormat(), csvLine);
 	}
 
 	/**
-	 * Parse a single csv data line for data entries.
+	 * Parses a single CSV line using the given CSV format. Counterpart of
+	 * {@link CsvWriter#getCsvLine(CsvFormat, List)}.
 	 *
 	 * @param csvFormat
+	 *            the CSV format
 	 * @param csvLine
-	 * @return
+	 *            the CSV line, without or with trailing line break
+	 * @return the values of the line
 	 * @throws Exception
+	 *             if the text contains no or more than one CSV line, or does not match the CSV
+	 *             format
 	 */
 	public static List<String> parseCsvLine(final CsvFormat csvFormat, final String csvLine) throws Exception {
 		try (CsvReader reader = new CsvReader(new ByteArrayInputStream(csvLine.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8, csvFormat)) {
@@ -437,18 +480,16 @@ public class CsvReader extends BasicReader {
 			} else {
 				return fullData.get(0);
 			}
-		} catch (final CsvDataException e) {
-			throw e;
 		}
 	}
 
 	/**
-	 * Returns the first duplicate csv file header or null if there is no duplicate.
-	 * Leading and trailing whitespaces in csv file headers are omitted.
-	 * Csv file headers are case-sensitive.
+	 * Returns the first duplicate CSV file header. Leading and trailing whitespaces are ignored,
+	 * empty headers are skipped and headers are case-sensitive.
 	 *
 	 * @param csvFileHeaders
-	 * @return
+	 *            the headers to check
+	 * @return the first duplicate header, or null if there is no duplicate
 	 */
 	public static String checkForDuplicateCsvHeader(final List<String> csvFileHeaders) {
 		final Set<String> foundHeaders = new HashSet<>();
