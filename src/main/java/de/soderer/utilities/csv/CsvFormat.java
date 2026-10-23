@@ -154,8 +154,12 @@ public class CsvFormat {
 
 		// Use setters to validate parameters
 		setSeparator(separator);
-		setStringQuote(stringQuote);
-		setStringQuoteEscapeCharacter(stringQuoteEscapeCharacter);
+		if (quoteMode != QuoteMode.NO_QUOTE) {
+			// Stringquote and its escape character are only relevant and validated if quoting is active,
+			// like with the setters, where e.g. withStringQuote(null).withSeparator('"') is allowed
+			setStringQuote(stringQuote);
+			setStringQuoteEscapeCharacter(stringQuoteEscapeCharacter);
+		}
 		setLineBreakInDataAllowed(lineBreakInDataAllowed);
 		setEscapedStringQuoteInDataAllowed(escapedStringQuoteInDataAllowed);
 		setFillMissingTrailingColumnsWithNull(fillMissingTrailingColumnsWithNull);
